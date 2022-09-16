@@ -4719,7 +4719,7 @@ void CConfig::SetPostprocessing(SU2_COMPONENT val_software, unsigned short val_i
     for (int i=0; i<7; ++i) eng_cyl[i] /= 12.0;
   }
 
-  if ((Kind_Turb_Model != TURB_MODEL::SA) && Kind_Trans_Model == TURB_TRANS_MODEL::eN) {
+  if ((Kind_Turb_Model != TURB_MODEL::SA) && Kind_Trans_Model == TURB_TRANS_MODEL::EN) {
       SU2_MPI::Error("eN transition model currently only available in combination with SA turbulence model!", CURRENT_FUNCTION);
     }
 
@@ -6034,7 +6034,7 @@ void CConfig::SetOutput(SU2_COMPONENT val_software, unsigned short val_izone) {
         }
         switch (Kind_Trans_Model) {
 			case TURB_TRANS_MODEL::NONE:  break;
-			case TURB_TRANS_MODEL::eN:    cout << "Low turbulence Transition model: eN 2 equation model (2014)" << endl; break;
+			case TURB_TRANS_MODEL::EN:    cout << "Low-turbulence Transition model: eN 2 equation model (2014)" << endl; break;
 			}
         cout << "Hybrid RANS/LES: ";
         switch (Kind_HybridRANSLES) {
