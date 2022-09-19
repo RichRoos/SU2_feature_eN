@@ -42,8 +42,6 @@ private:
   using Base = CAvgGrad_Scalar<FlowIndices>;
   using Base::Laminar_Viscosity_i;
   using Base::Laminar_Viscosity_j;
-  using Base::Eddy_Viscosity_i;
-  using Base::Eddy_Viscosity_j;
   using Base::Density_i;
   using Base::Density_j;
   using Base::ScalarVar_i;
@@ -53,7 +51,9 @@ private:
   using Base::implicit;
   using Base::Flux;
   using Base::Jacobian_i;
-  using Base::Jacobian_j;  
+  using Base::Jacobian_j;
+
+  const su2double sigma = 2.0/3.0;
 
   /*!
    * \brief Adds any extra variables to AD
@@ -61,34 +61,23 @@ private:
   void ExtraADPreaccIn() override {}
 
   /*!
-   * \brief LM transition model specific steps in the ComputeResidual method
+   * \brief SA specific steps in the ComputeResidual method
    * \param[in] config - Definition of the particular problem.
    */
   void FinishResidualCalc(const CConfig* config) override {
-   
-    /*--- Compute mean effective dynamic viscosity ---*/
-	  // Need to be changed!
+    /*--- Compute mean effective viscosity ---*/
 
-    const su2double diff_i_gamma = Laminar_Viscosity_i + Eddy_Viscosity_i;
-    const su2double diff_j_gamma = Laminar_Viscosity_j + Eddy_Viscosity_j;
-    const su2double diff_i_ReThetaT = 2.0*(Laminar_Viscosity_i + Eddy_Viscosity_i);
-    const su2double diff_j_ReThetaT = 2.0*(Laminar_Viscosity_j + Eddy_Viscosity_j);
+    const su2double nu_i = Laminar_Viscosity_i/Density_i;
+    const su2double nu_j = Laminar_Viscosity_j/Density_j;
+    const su2double nu_e = 0.5*(nu_i+nu_j+ScalarVar_i[0]+ScalarVar_j[0]);
 
-    const su2double diff_gamma = 0.5*(diff_i_gamma + diff_j_gamma);
-    const su2double diff_ReThetaT = 0.5*(diff_i_ReThetaT + diff_j_ReThetaT);
+    Flux[0] = nu_e*Proj_Mean_GradScalarVar[0]/sigma;
 
-    Flux[0] = diff_gamma*Proj_Mean_GradScalarVar[0];
-    Flux[1] = diff_ReThetaT*Proj_Mean_GradScalarVar[1];
+    /*--- For Jacobians -> Use of TSL approx. to compute derivatives of the gradients ---*/
 
-    /*--- For Jacobians -> Use of TSL (Thin Shear Layer) approx. to compute derivatives of the gradients ---*/
     if (implicit) {
-      const su2double proj_on_rho_i = proj_vector_ij/Density_i;
-      Jacobian_i[0][0] = -diff_gamma*proj_on_rho_i;  Jacobian_i[0][1] = 0.0;
-      Jacobian_i[1][0] = 0.0;                        Jacobian_i[1][1] = -diff_ReThetaT*proj_on_rho_i;
-
-      const su2double proj_on_rho_j = proj_vector_ij/Density_j;
-      Jacobian_j[0][0] = diff_gamma*proj_on_rho_j;   Jacobian_j[0][1] = 0.0;
-      Jacobian_j[1][0] = 0.0;                        Jacobian_j[1][1] = diff_ReThetaT*proj_on_rho_j;
+      Jacobian_i[0][0] = (0.5*Proj_Mean_GradScalarVar[0]-nu_e*proj_vector_ij)/sigma;
+      Jacobian_j[0][0] = (0.5*Proj_Mean_GradScalarVar[0]+nu_e*proj_vector_ij)/sigma;
     }
   }
 
@@ -100,8 +89,7 @@ public:
    * \param[in] correct_grad - Whether to correct gradient for skewness.
    * \param[in] config - Definition of the particular problem.
    */
-  CAvgGrad_TransEN(unsigned short val_nDim, unsigned short val_nVar, bool correct_grad, const CConfig* config)
-    : CAvgGrad_Scalar<FlowIndices>(val_nDim, val_nVar, correct_grad, config){
-  }
-  
+  CAvgGrad_TransEN(unsigned short val_nDim, unsigned short val_nVar,
+                  bool correct_grad, const CConfig* config)
+    : CAvgGrad_Scalar<FlowIndices>(val_nDim, val_nVar, correct_grad, config) {}
 };
