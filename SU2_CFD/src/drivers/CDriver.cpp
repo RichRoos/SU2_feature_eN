@@ -85,6 +85,9 @@
 #include "../../include/numerics/turbulent/turb_convection.hpp"
 #include "../../include/numerics/turbulent/turb_diffusion.hpp"
 #include "../../include/numerics/turbulent/turb_sources.hpp"
+#include "../../include/numerics/turbulent/transition/trans_convection.hpp"
+#include "../../include/numerics/turbulent/transition/trans_diffusion.hpp"
+#include "../../include/numerics/turbulent/transition/trans_sources.hpp"
 #include "../../include/numerics/species/species_convection.hpp"
 #include "../../include/numerics/species/species_diffusion.hpp"
 #include "../../include/numerics/species/species_sources.hpp"
@@ -1446,7 +1449,7 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
     case MAIN_SOLVER::RANS:
     case MAIN_SOLVER::DISC_ADJ_RANS:
       ns = compressible = turbulent = true;
-      transition = (config->GetKind_Trans_Model() == TURB_TRANS_MODEL::LM);
+      transition = (config->GetKind_Trans_Model() != TURB_TRANS_MODEL::NONE);
       species = config->GetKind_Species_Model() != SPECIES_MODEL::NONE; break;
 
     case MAIN_SOLVER::INC_EULER:
@@ -1463,7 +1466,7 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
     case MAIN_SOLVER::DISC_ADJ_INC_RANS:
       ns = incompressible = turbulent = true;
       heat = config->GetWeakly_Coupled_Heat();
-      transition = (config->GetKind_Trans_Model() == TURB_TRANS_MODEL::LM);
+      transition = (config->GetKind_Trans_Model() != TURB_TRANS_MODEL::NONE);
       species = (config->GetKind_Species_Model() != SPECIES_MODEL::NONE); break;
 
     case MAIN_SOLVER::FEM_EULER:
