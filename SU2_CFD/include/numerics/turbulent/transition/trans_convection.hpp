@@ -59,7 +59,7 @@ private:
    * \param[in] config - Definition of the particular problem.
    */
   void FinishResidualCalc(const CConfig* config) override {
-    Flux[0] = a0*ScalarVar_i[0] + a1*ScalarVar_j[0];
+	  Flux[0] = a0*V_i[idx.Density()]*ScalarVar_i[0] + a1*V_j[idx.Density()]*ScalarVar_j[0];
 
     if (implicit) {
       Jacobian_i[0][0] = a0;

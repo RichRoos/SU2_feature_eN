@@ -42,6 +42,8 @@ private:
   using Base = CAvgGrad_Scalar<FlowIndices>;
   using Base::Laminar_Viscosity_i;
   using Base::Laminar_Viscosity_j;
+  using Base::Eddy_Viscosity_i;
+  using Base::Eddy_Viscosity_j;
   using Base::Density_i;
   using Base::Density_j;
   using Base::ScalarVar_i;
@@ -53,7 +55,7 @@ private:
   using Base::Jacobian_i;
   using Base::Jacobian_j;
 
-  const su2double sigma = 2.0/3.0;
+  const su2double sigma_n;
 
   /*!
    * \brief Adds any extra variables to AD
@@ -65,19 +67,19 @@ private:
    * \param[in] config - Definition of the particular problem.
    */
   void FinishResidualCalc(const CConfig* config) override {
-    /*--- Compute mean effective viscosity ---*/
+	/*--- Compute mean effective dynamic viscosity ---*/
+	const su2double diff_i_amplification = (Laminar_Viscosity_i + Eddy_Viscosity_i)/sigma_n;
+	const su2double diff_j_amplification = (Laminar_Viscosity_j + Eddy_Viscosity_j)/sigma_n;
 
-    const su2double nu_i = Laminar_Viscosity_i/Density_i;
-    const su2double nu_j = Laminar_Viscosity_j/Density_j;
-    const su2double nu_e = 0.5*(nu_i+nu_j+ScalarVar_i[0]+ScalarVar_j[0]);
+	const su2double diff_amplification = 0.5*(diff_i_amplification + diff_j_amplification);
 
-    Flux[0] = nu_e*Proj_Mean_GradScalarVar[0]/sigma;
+    Flux[0] = diff_amplification*Proj_Mean_GradScalarVar[0];
 
     /*--- For Jacobians -> Use of TSL approx. to compute derivatives of the gradients ---*/
 
     if (implicit) {
-      Jacobian_i[0][0] = (0.5*Proj_Mean_GradScalarVar[0]-nu_e*proj_vector_ij)/sigma;
-      Jacobian_j[0][0] = (0.5*Proj_Mean_GradScalarVar[0]+nu_e*proj_vector_ij)/sigma;
+      Jacobian_i[0][0] = (0.5*Proj_Mean_GradScalarVar[0]-diff_amplification*proj_vector_ij);
+      Jacobian_j[0][0] = (0.5*Proj_Mean_GradScalarVar[0]+diff_amplification*proj_vector_ij);
     }
   }
 
