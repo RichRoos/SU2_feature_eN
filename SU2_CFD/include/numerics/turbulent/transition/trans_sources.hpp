@@ -46,13 +46,9 @@ class CSourcePieceWise_TransEN final : public CNumerics {
   g_sep_i,
   g_sep_j;
 
-  /*--- e^N Closure constants ---*/
-  const su2double sigma_n = 1.0;
-
   su2double Vorticity;
-  su2double Residual[2];
-  su2double* Jacobian_i[2];
-  su2double Jacobian_Buffer[4];// Static storage for the Jacobian (which needs to be pointer for return type).
+  su2double Residual, *Jacobian_i;
+  su2double Jacobian_Buffer; /*!< \brief Static storage for the Jacobian (which needs to be pointer for return type). */
 
  public:
   /*!
@@ -62,12 +58,11 @@ class CSourcePieceWise_TransEN final : public CNumerics {
    * \param[in] config - Definition of the particular problem.
    */
   CSourcePieceWise_TransEN(unsigned short val_nDim, unsigned short val_nVar, const CConfig* config)
-      : CNumerics(val_nDim, 2, config),
+      : CNumerics(val_nDim, 1, config),
         idx(val_nDim, config->GetnSpecies()) {
     
     /*--- "Allocate" the Jacobian using the static buffer. ---*/
-    Jacobian_i[0] = Jacobian_Buffer;
-    Jacobian_i[1] = Jacobian_Buffer + 2;
+	Jacobian_i = &Jacobian_Buffer;
   }
 
   /*!
@@ -76,78 +71,96 @@ class CSourcePieceWise_TransEN final : public CNumerics {
    * \return A lightweight const-view (read-only) of the residual/flux and Jacobians.
    */
   ResidualType<> ComputeResidual(const CConfig* config) override {
-  /*--- ScalarVar[0] = k, ScalarVar[0] = w, TransVar[0] = gamma, and TransVar[0] = ReThetaT ---*/
-  /*--- dU/dx = PrimVar_Grad[1][0] ---*/
-  AD::StartPreacc();
-  AD::SetPreaccIn(StrainMag_i);
-  AD::SetPreaccIn(ScalarVar_i, nVar);
-  AD::SetPreaccIn(ScalarVar_Grad_i, nVar, nDim);
-  AD::SetPreaccIn(TransVar_i, nVar);
-  AD::SetPreaccIn(TransVar_Grad_i, nVar, nDim);
-  AD::SetPreaccIn(Volume); AD::SetPreaccIn(dist_i);
-  AD::SetPreaccIn(&V_i[idx.Velocity()], nDim);
-  AD::SetPreaccIn(PrimVar_Grad_i, nDim+idx.Velocity(), nDim);
-  AD::SetPreaccIn(Vorticity_i, 3);
 
-  su2double VorticityMag = sqrt(Vorticity_i[0]*Vorticity_i[0] +
-                                Vorticity_i[1]*Vorticity_i[1] +
-                                Vorticity_i[2]*Vorticity_i[2]);
+    AD::StartPreacc();
+    AD::SetPreaccIn(V_i[idx.Density()], V_i[idx.Pressure()], V_i[idx.LaminarViscosity()], StrainMag_i, ScalarVar_i[0], Volume, dist_i);
+    AD::SetPreaccIn(&V_i[idx.Velocity()], nDim);
+    AD::SetPreaccIn(Vorticity_i, 3);
+    AD::SetPreaccIn(PrimVar_Grad_i + idx.Velocity(), nDim, nDim);
+    AD::SetPreaccIn(ScalarVar_Grad_i[0], nDim);
+
+    su2double rho 	= V_i[idx.Density()];
+    su2double p 	= V_i[idx.Pressure()];
+    su2double muLam = V_i[idx.LaminarViscosity()];
+
+    su2double VorticityMag = sqrt(Vorticity_i[0]*Vorticity_i[0] +
+                                  Vorticity_i[1]*Vorticity_i[1] +
+                                  Vorticity_i[2]*Vorticity_i[2]);
+
+    const su2double vel_u = V_i[idx.Velocity()];
+    const su2double vel_v = V_i[1+idx.Velocity()];
+    const su2double vel_w = (nDim ==3) ? V_i[2+idx.Velocity()] : 0.0;
+
+    const su2double vel_mag = sqrt(vel_u*vel_u + vel_v*vel_v + vel_w*vel_w);
+
+    su2double rhoInf			= config->GetDensity_FreeStreamND();
+    su2double pInf 				= config->GetPressure_FreeStreamND();
+    const su2double *velInf 	= config->GetVelocity_FreeStreamND();
+
+    su2double velInf2 = 0.0;
+    for(unsigned short iDim = 0; iDim < nDim; ++iDim) {
+    	velInf2 += velInf[iDim]*velInf[iDim];
+    }
+
+    su2double Gamma = config->GetGamma();
+
+    Residual[0] = 0.0;
+    Jacobian_i[0] = 0.0;
+
+    if (dist_i > 1e-10) {
+
+      const su2double rho_e 	= pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
+
+      /*--- Estimate of the flow velocity at the edge of the boundary layer ---*/
+      const su2double G_over_Gminus_one = Gamma/(Gamma-1);
+
+      const su2double u_e 		= pow(2*(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e)),0.5);
+
+      /*--- Local pressure-gradient parameter for the boundary layer shape factor ---*/
+      const su2double H_L 		= (StrainMag_i*dist_i)/u_e;
+
+      /*--- Integral shape factor ---*/
+      const su2double H_12 		= 13.9766*pow(H_L,4) - 22.9166*pow(H_L,3) + 13.7227*pow(H_L,2) - 1.0023*H_L + 1.6778;
+
+      /*--- F growth parameters ---*/
+      const su2double DH_12 	= (0.0616*pow(H_12,2) + 0.2339*H_12 + 3.4298)/
+    		  	  	  	  	  	     (0.0047*pow(H_12,3) - 0.1056*pow(H_12,2) + 0.9350*H_12 - 1.2071);
+
+      const su2double lH_12 	= (6.54*H_12 - 14.07)/pow(H_12,2);
+      const su2double mH_12 	= (0.058*(pow((H_12 - 4),2)/(H_12 - 1)) - 0.068)*(1/lH_12);
+
+      const su2double F_growth 	= DH_12*((1 + mH_12)*lH_12)/2;
+
+      /*--- F critical parameters ---*/
+      const su2double Re_y 		= (rho*vel_mag*dist_i)/muLam;
+      const su2double k_y 		= -0.00315*pow(H_12,3) + 0.0986*pow(H_12,2) - 0.242*H_12 + 3.739;
+      const su2double Re_d2_0 	= pow(10,(0.7*tanh((14/(H_12 - 1)) - 9.24) + 2.492/pow((H_12 - 1),0.43) + 0.62));
+      const su2double Re_y_0	= k_y * Re_d2_0;
+
+      const short F_crit;
+      if (Re_y < Re_y_0){
+        F_crit = 0;
+      } else {
+    	F_crit = 1;
+      }
+
+      /*--- Source term expresses streamwise growth of Tollmien_schlichting instabilities ---*/
+      const su2double dn_over_dRe_d2 = 0.028*(H_12 - 1) - 0.0345*exp(-pow((3.87/(H_12 - 1) - 2.52),2));
+
+      /*--- Production term ---*/
+      const su2double P_amplification = rho*VorticityMag*F_crit*F_growth*dn_over_dRe_d2;
+
+      /*--- Source ---*/
+      Residual = P_amplification * Volume;
+
+      /*--- Implicit part ---*/
+      Jacobian_i[0] *= Volume;
+    }
   
-  const su2double vel_u = V_i[idx.Velocity()];
-  const su2double vel_v = V_i[1+idx.Velocity()];
-  const su2double vel_w = (nDim ==3) ? V_i[2+idx.Velocity()] : 0.0;
+    AD::SetPreaccOut(Residual, nVar);
+    AD::EndPreacc();
 
-  const su2double Velocity_Mag = sqrt(vel_u*vel_u + vel_v*vel_v + vel_w*vel_w);
-
-  AD::SetPreaccIn(V_i[idx.Density()], V_i[idx.LaminarViscosity()], V_i[idx.EddyViscosity()]);
-
-  Density_i = V_i[idx.Density()];
-  Laminar_Viscosity_i = V_i[idx.LaminarViscosity()];
-  Eddy_Viscosity_i = V_i[idx.EddyViscosity()];
-
-  Residual[0] = 0.0;       Residual[1] = 0.0;
-  Jacobian_i[0][0] = 0.0;  Jacobian_i[0][1] = 0.0;
-  Jacobian_i[1][0] = 0.0;  Jacobian_i[1][1] = 0.0;
-  
-  if (dist_i > 1e-10) {
-
-    /*-- Gradient of velocity magnitude ---*/
-
-    su2double dU_dx = 0.5/Velocity_Mag*( 2.*vel_u*PrimVar_Grad_i[1][0]
-                              +2.*vel_v*PrimVar_Grad_i[2][0]);
-    if (nDim==3)
-      dU_dx += 0.5/Velocity_Mag*( 2.*vel_w*PrimVar_Grad_i[3][0]);
-
-    su2double dU_dy = 0.5/Velocity_Mag*( 2.*vel_u*PrimVar_Grad_i[1][1]
-                              +2.*vel_v*PrimVar_Grad_i[2][1]);
-    if (nDim==3)
-      dU_dy += 0.5/Velocity_Mag*( 2.*vel_w*PrimVar_Grad_i[3][1]);
-
-    su2double dU_dz = 0.0;
-    if (nDim==3)
-      dU_dz = 0.5/Velocity_Mag*( 2.*vel_u*PrimVar_Grad_i[1][2]
-                                +2.*vel_v*PrimVar_Grad_i[2][2]
-                                +2.*vel_w*PrimVar_Grad_i[3][2]);
-
-    su2double du_ds = vel_u/Velocity_Mag*dU_dx + vel_v/Velocity_Mag*dU_dy;
-    if (nDim==3)
-      du_ds += vel_w/Velocity_Mag * dU_dz;
-
-    /*--- Source ---*/
-    Residual[0] += 1.0*Volume;
-    Residual[1] += 1.0*Volume;
-
-    /*--- Implicit part ---*/   
-    Jacobian_i[0][0] = (1.0)*Volume;
-    Jacobian_i[0][1] = 0.0;
-    Jacobian_i[1][0] = 0.0;
-    Jacobian_i[1][1] = 1.0*Volume;
-  }  
-  
-  AD::SetPreaccOut(Residual, nVar);
-  AD::EndPreacc();
-
-  return ResidualType<>(Residual, Jacobian_i, nullptr);
+    return ResidualType<>(&Residual, &Jacobian_i, nullptr);
   }
 };
 

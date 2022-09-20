@@ -98,8 +98,8 @@ CTransENSolver::CTransENSolver(CGeometry *geometry, CConfig *config, unsigned sh
   }
 
   /*--- Initialize lower and upper limits---*/
-  lowerlimit[0] = 1.0e-4;
-  upperlimit[0] = 5.0;
+  lowerlimit[0] = 1.0e-10;
+  upperlimit[0] = 1.0e10;
 
   lowerlimit[1] = 1.0e-4;
   upperlimit[1] = 1.0e15;

@@ -55,7 +55,7 @@ private:
   using Base::Jacobian_i;
   using Base::Jacobian_j;
 
-  const su2double sigma_n;
+  const su2double sigma_n = 1.0;
 
   /*!
    * \brief Adds any extra variables to AD
@@ -67,6 +67,7 @@ private:
    * \param[in] config - Definition of the particular problem.
    */
   void FinishResidualCalc(const CConfig* config) override {
+
 	/*--- Compute mean effective dynamic viscosity ---*/
 	const su2double diff_i_amplification = (Laminar_Viscosity_i + Eddy_Viscosity_i)/sigma_n;
 	const su2double diff_j_amplification = (Laminar_Viscosity_j + Eddy_Viscosity_j)/sigma_n;
@@ -79,7 +80,12 @@ private:
 
     if (implicit) {
       Jacobian_i[0][0] = (0.5*Proj_Mean_GradScalarVar[0]-diff_amplification*proj_vector_ij);
+      //const su2double proj_on_rho_i = proj_vector_ij/Density_i;
+      //Jacobian_i[0][0] = -diff_amplification*proj_on_rho_i;
+
       Jacobian_j[0][0] = (0.5*Proj_Mean_GradScalarVar[0]+diff_amplification*proj_vector_ij);
+      //const su2double proj_on_rho_j = proj_vector_ij/Density_j;
+      //Jacobian_j[0][0] = diff_amplification*proj_on_rho_j;
     }
   }
 
