@@ -104,7 +104,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
 
     su2double Gamma = config->GetGamma();
 
-    Residual[0] = 0.0;
+    Residual = 0.0;
     Jacobian_i[0] = 0.0;
 
     if (dist_i > 1e-10) {
@@ -157,7 +157,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       Jacobian_i[0] *= Volume;
     }
   
-    AD::SetPreaccOut(Residual, nVar);
+    AD::SetPreaccOut(Residual);
     AD::EndPreacc();
 
     return ResidualType<>(&Residual, &Jacobian_i, nullptr);

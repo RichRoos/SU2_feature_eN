@@ -6034,7 +6034,7 @@ void CConfig::SetOutput(SU2_COMPONENT val_software, unsigned short val_izone) {
         }
         switch (Kind_Trans_Model) {
 			case TURB_TRANS_MODEL::NONE:  break;
-			case TURB_TRANS_MODEL::EN:    cout << "Low-turbulence Transition model: eN 2 equation model (2014)" << endl; break;
+			case TURB_TRANS_MODEL::EN:    cout << "Low-turbulence Transition model: eN 1 equation model (2014)" << endl; break;
 			}
         cout << "Hybrid RANS/LES: ";
         switch (Kind_HybridRANSLES) {

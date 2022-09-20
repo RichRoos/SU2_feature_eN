@@ -40,6 +40,9 @@ template <class FlowIndices>
 class CUpwSca_TransEN final : public CUpwScalar<FlowIndices> {
 private:
   using Base = CUpwScalar<FlowIndices>;
+  using Base::nDim;
+  using Base::V_i;
+  using Base::V_j;
   using Base::a0;
   using Base::a1;
   using Base::Flux;
@@ -48,6 +51,7 @@ private:
   using Base::ScalarVar_i;
   using Base::ScalarVar_j;
   using Base::implicit;
+  using Base::idx;
 
   /*!
    * \brief Adds any extra variables to AD.

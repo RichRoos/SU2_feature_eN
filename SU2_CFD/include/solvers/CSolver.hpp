@@ -3147,6 +3147,12 @@ public:
   inline virtual su2double GetOmega_Inf(void) const { return 0; }
 
   /*!
+   * \brief Get value of the Amplification Factor.
+   * \return Value of the Amplification Factor.
+   */
+  inline virtual su2double GetAmplificationFactor_Inf() const { return 0; }
+
+  /*!
    * \brief A virtual member.
    * \return Value of the sensitivity coefficient for the Young Modulus E
    */

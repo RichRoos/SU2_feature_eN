@@ -114,12 +114,10 @@ CTransENSolver::CTransENSolver(CGeometry *geometry, CConfig *config, unsigned sh
   SetBaseClassPointerToNodes();
 
   /*--- MPI solution ---*/
-
   InitiateComms(geometry, config, SOLUTION);
   CompleteComms(geometry, config, SOLUTION);
 
   /*--- Initializate quantities for SlidingMesh Interface ---*/
-
   SlidingState.resize(nMarker);
   SlidingStateNodes.resize(nMarker);
 
@@ -132,7 +130,6 @@ CTransENSolver::CTransENSolver(CGeometry *geometry, CConfig *config, unsigned sh
 
   /*-- Allocation of inlets has to happen in derived classes (not CTurbSolver),
     due to arbitrary number of turbulence variables ---*/
-
   Inlet_TurbVars.resize(nMarker);
   for (unsigned long iMarker = 0; iMarker < nMarker; iMarker++) {
     Inlet_TurbVars[iMarker].resize(nVertex[iMarker],nVar);
@@ -141,7 +138,7 @@ CTransENSolver::CTransENSolver(CGeometry *geometry, CConfig *config, unsigned sh
     }
   }
 
-   const su2double CFL = config->GetCFL(MGLevel)*config->GetCFLRedCoeff_Turb();
+  const su2double CFL = config->GetCFL(MGLevel)*config->GetCFLRedCoeff_Turb();
   for (iPoint = 0; iPoint < nPoint; iPoint++) {
     nodes->SetLocalCFL(iPoint, CFL);
   }
