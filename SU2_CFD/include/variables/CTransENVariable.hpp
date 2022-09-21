@@ -1,5 +1,5 @@
 /*!
- * \file CTransLMVariable.hpp
+ * \file CTransENVariable.hpp
  * \brief Declaration of the variables of the e^N transition model.
  * \author F. Palacios, T. Economon
  * \version 7.4.0 "Blackbird"
@@ -30,8 +30,8 @@
 #include "CTurbVariable.hpp"
 
 /*!
- * \class CTransLMVariable
- * \brief Transition model variables.
+ * \class CTransENVariable
+ * \brief e^N Transition model variables.
  * \ingroup Turbulence_Model
  * \author R. Roos
  */

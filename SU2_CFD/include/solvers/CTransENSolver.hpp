@@ -204,8 +204,8 @@ public:
                  unsigned short val_marker) override;
 
   /*!
-   * \brief Get the value of the intermittency.
-   * \return Value of the turbulent kinetic energy.
+   * \brief Get the value of the amplification factor.
+   * \return Value of the amplification factor.
    */
   inline su2double GetAmplificationFactor_Inf(void) const override { return Solution_Inf[0]; }
 

@@ -1,5 +1,5 @@
 /*!
- * \file CTransLMVariable.cpp
+ * \file CTransENVariable.cpp
  * \brief Definition of the solution fields.
  * \author R. Roos
  * \version 7.4.0 "Blackbird"

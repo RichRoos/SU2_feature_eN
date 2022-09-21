@@ -3145,7 +3145,7 @@ public:
    * \return Value of the turbulent frequency.
    */
   inline virtual su2double GetOmega_Inf(void) const { return 0; }
-
+  
   /*!
    * \brief Get value of the Amplification Factor.
    * \return Value of the Amplification Factor.
