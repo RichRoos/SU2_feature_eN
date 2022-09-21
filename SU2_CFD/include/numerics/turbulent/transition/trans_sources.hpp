@@ -41,10 +41,10 @@ class CSourcePieceWise_TransEN final : public CNumerics {
  private:
   const FlowIndices idx; /*!< \brief Object to manage the access to the flow primitives. */
 
-  su2double g_eff_i,
+  /*su2double g_eff_i,
   g_eff_j,
   g_sep_i,
-  g_sep_j;
+  g_sep_j;*/
 
   su2double Vorticity;
   su2double Residual, *Jacobian_i;
@@ -137,9 +137,9 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       const su2double Re_d2_0 	= pow(10,(0.7*tanh((14/(H_12 - 1)) - 9.24) + 2.492/pow((H_12 - 1),0.43) + 0.62));
       const su2double Re_y_0	= k_y * Re_d2_0;
 
-      const short F_crit;
+      short F_crit = 0;
       if (Re_y < Re_y_0){
-        F_crit = 0;
+    	F_crit = 0;
       } else {
     	F_crit = 1;
       }
