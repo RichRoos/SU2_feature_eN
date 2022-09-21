@@ -1598,6 +1598,8 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
 
   }
 
+  cout << endl <<"------------------- RR: Numerics Preprocessing: Booleans done -------------------" << endl;
+
   /*--- Number of variables for the template ---*/
 
   if (template_solver) nVar_Flow = solver[MESH_0][FLOW_SOL]->GetnVar();
@@ -1619,6 +1621,8 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
   if (heat)         nVar_Heat = solver[MESH_0][HEAT_SOL]->GetnVar();
 
   if (config->AddRadiation()) nVar_Rad = solver[MESH_0][RAD_SOL]->GetnVar();
+
+  cout << endl <<"------------------- RR: Numerics Preprocessing: activate transition -------------------" << endl;
 
   /*--- Number of variables for adjoint problem ---*/
 
@@ -1657,6 +1661,8 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
 
   const int fea_term = FEA_TERM + offset;
 
+  cout << endl <<"------------------- RR: Numerics Preprocessing: Thread set-up -------------------" << endl;
+
   /*--- Solver definition for the template problem ---*/
   if (template_solver) {
 
@@ -1685,6 +1691,8 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
     }
 
   }
+
+  cout << endl <<"------------------- RR: Numerics Preprocessing: Template solver -------------------" << endl;
 
   /*--- Solver definition for the Potential, Euler, Navier-Stokes problems ---*/
   if ((euler) || (ns)) {
@@ -2096,6 +2104,7 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
   /*--- Solver definition for the turbulent model problem ---*/
 
   if (turbulent) {
+	  cout << endl <<"------------------- RR: Numerics Preprocessing: Turbulence found -------------------" << endl;
     if (incompressible)
       InstantiateTurbulentNumerics<CIncEulerVariable::CIndices<unsigned short> >(nVar_Turb, offset, config,
                                                                                  solver[MESH_0][TURB_SOL], numerics);
@@ -2109,6 +2118,7 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
 
   /*--- Solver definition for the transition model problem ---*/
   if (transition) {
+	  cout << endl <<"------------------- RR: Numerics Preprocessing: Transition found -------------------" << endl;
 	if (incompressible)
 	  InstantiateTransitionNumerics<CIncEulerVariable::CIndices<unsigned short> >(nVar_Trans, offset, config,
 																				 solver[MESH_0][TRANS_SOL], numerics);
@@ -2402,6 +2412,8 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
     numerics[MESH_0][MESH_SOL][fea_term] = new CFEAMeshElasticity(nDim, nDim, geometry[MESH_0]->GetnElem(), config);
 
   } // end "per-thread" allocation loop
+
+  cout << endl <<"------------------- RR: Numerics Preprocessing: done -------------------" << endl;
 
 }
 
