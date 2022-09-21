@@ -55,7 +55,7 @@ struct CSAVariables {
   su2double Omega, dist_i_2, inv_k2_d2, inv_Shat, g_6, norm2_Grad, gamma_bc;
 
   /*--- List of booleans ---*/
-  const bool transEN = false;
+  bool transEN = false;
 };
 
 /*!

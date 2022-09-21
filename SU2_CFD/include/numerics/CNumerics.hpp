@@ -82,8 +82,8 @@ protected:
   turb_ke_i,  /*!< \brief Turbulent kinetic energy at point i. */
   turb_ke_j;  /*!< \brief Turbulent kinetic energy at point j. */
   su2double
-  amplification_factor_i,  /*!< \brief separation intermittency at point i. */
-  amplification_factor_j;  /*!< \brief separation intermittency at point j. */
+  amplification_factor_i,  /*!< \brief amplification factor at point i. */
+  amplification_factor_j;  /*!< \brief amplification factor at point j. */
   su2double
   Pressure_i,  /*!< \brief Pressure at point i. */
   Pressure_j;  /*!< \brief Pressure at point j. */
