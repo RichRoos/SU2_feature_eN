@@ -4723,8 +4723,10 @@ void CConfig::SetPostprocessing(SU2_COMPONENT val_software, unsigned short val_i
     SU2_MPI::Error("The LM transition model is under maintenance.", CURRENT_FUNCTION);
   }
 
-  if (((!saParsedOptions.ft2) || (saParsedOptions.version != SA_OPTIONS::NONE)) && (Kind_Trans_Model == TURB_TRANS_MODEL::EN)) {
-      SU2_MPI::Error("eN transition model is only available with the SA turbulence model with ft2 term.", CURRENT_FUNCTION);
+  if (saParsedOptions.version != SA_OPTIONS::NONE) {
+    if ((!saParsedOptions.ft2) && (Kind_Trans_Model == TURB_TRANS_MODEL::EN)) {
+      SU2_MPI::Error("eN transition model is only available with the SA (default/WITHFT2) turbulence model.", CURRENT_FUNCTION);
+    }
   }
 
   if (Turb_Fixed_Values && !OptionIsSet("TURB_FIXED_VALUES_DOMAIN")){

@@ -2096,7 +2096,6 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
   /*--- Solver definition for the turbulent model problem ---*/
 
   if (turbulent) {
-	  cout << endl <<"------------------- RR: Numerics Preprocessing: Turbulence found -------------------" << endl;
     if (incompressible)
       InstantiateTurbulentNumerics<CIncEulerVariable::CIndices<unsigned short> >(nVar_Turb, offset, config,
                                                                                  solver[MESH_0][TURB_SOL], numerics);
@@ -2110,7 +2109,6 @@ void CDriver::Numerics_Preprocessing(CConfig *config, CGeometry **geometry, CSol
 
   /*--- Solver definition for the transition model problem ---*/
   if (transition) {
-	  cout << endl <<"------------------- RR: Numerics Preprocessing: Transition found -------------------" << endl;
 	if (incompressible)
 	  InstantiateTransitionNumerics<CIncEulerVariable::CIndices<unsigned short> >(nVar_Trans, offset, config,
 																				 solver[MESH_0][TRANS_SOL], numerics);
