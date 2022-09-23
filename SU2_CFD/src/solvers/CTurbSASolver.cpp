@@ -265,6 +265,7 @@ void CTurbSASolver::Viscous_Residual(unsigned long iEdge, CGeometry* geometry, C
   /*--- Now instantiate the generic implementation with the functor above. ---*/
 
   Viscous_Residual_impl(SolverSpecificNumerics, iEdge, geometry, solver_container, numerics, config);
+
 }
 
 void CTurbSASolver::Source_Residual(CGeometry *geometry, CSolver **solver_container,
