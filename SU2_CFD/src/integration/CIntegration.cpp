@@ -60,17 +60,17 @@ void CIntegration::Space_Integration(CGeometry *geometry,
       break;
   }
 
-  cout << endl <<"------------ RR: CIntegration: Space_integration - Inviscid residuals done ------------" << endl;
+  //cout << endl <<"------------ RR: CIntegration: Space_integration - Inviscid residuals done ------------" << endl;
 
   /*--- Compute viscous residuals ---*/
   solver_container[MainSolver]->Viscous_Residual(geometry, solver_container, numerics, config, iMesh, iRKStep);
 
-  cout << endl <<"------------ RR: CIntegration: Space_integration - Viscous residuals done ------------" << endl;
+  //cout << endl <<"------------ RR: CIntegration: Space_integration - Viscous residuals done ------------" << endl;
 
   /*--- Compute source term residuals ---*/
   solver_container[MainSolver]->Source_Residual(geometry, solver_container, numerics, config, iMesh);
 
-  cout << endl <<"------------ RR: CIntegration: Space_integration - Source residuals done ------------" << endl;
+  //cout << endl <<"------------ RR: CIntegration: Space_integration - Source residuals done ------------" << endl;
 
   /*--- Add viscous and convective residuals, and compute the Dual Time Source term ---*/
 
@@ -211,12 +211,12 @@ void CIntegration::Time_Integration(CGeometry *geometry, CSolver **solver_contai
       solver_container[MainSolver]->ExplicitEuler_Iteration(geometry, solver_container, config);
       break;
     case (EULER_IMPLICIT):
-	  cout << endl <<"------------ RR: CIntegration: Time integration - Euler implicit start ------------" << endl;
+	  //cout << endl <<"------------ RR: CIntegration: Time integration - Euler implicit start ------------" << endl;
       solver_container[MainSolver]->ImplicitEuler_Iteration(geometry, solver_container, config);
       break;
   }
 
-  cout << endl <<"------------ RR: CIntegration: Time integration - Euler implicit Done ------------" << endl;
+  //cout << endl <<"------------ RR: CIntegration: Time integration - Euler implicit Done ------------" << endl;
 
 }
 

@@ -275,11 +275,11 @@ void CTurbSASolver::Source_Residual(CGeometry *geometry, CSolver **solver_contai
   const bool harmonic_balance = (config->GetTime_Marching() == TIME_MARCHING::HARMONIC_BALANCE);
   const bool transition_BC = config->GetSAParsedOptions().bc;
 
-  cout << endl <<"------------ RR: CTurbSASolver: Source residual - staring ------------" << endl;
+  //cout << endl <<"------------ RR: CTurbSASolver: Source residual - staring ------------" << endl;
 
   bool transition_EN = false;
   if(TURB_TRANS_MODEL::EN == config->GetKind_Trans_Model()) transition_EN = true;
-  if (transition_EN) cout << endl <<"------------ RR: CTurbSASolver: Source residual - EN transition found ------------" << endl;
+  //if (transition_EN) cout << endl <<"------------ RR: CTurbSASolver: Source residual - EN transition found ------------" << endl;
 
   auto* flowNodes = su2staticcast_p<CFlowVariable*>(solver_container[FLOW_SOL]->GetNodes());
 
@@ -370,7 +370,7 @@ void CTurbSASolver::Source_Residual(CGeometry *geometry, CSolver **solver_contai
   }
   END_SU2_OMP_FOR
 
-  cout << endl <<"------------ RR: CTurbSASolver: Source residual - Done ------------" << endl;
+  //cout << endl <<"------------ RR: CTurbSASolver: Source residual - Done ------------" << endl;
 
   if (harmonic_balance) {
 

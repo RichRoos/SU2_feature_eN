@@ -161,7 +161,7 @@ void CTransENSolver::Preprocessing(CGeometry *geometry, CSolver **solver_contain
 
 void CTransENSolver::Postprocessing(CGeometry *geometry, CSolver **solver_container, CConfig *config, unsigned short iMesh) {
 
-  cout << endl <<"------------ RR: CTransENSolver: Postprocessing - Start ------------" << endl;
+  //cout << endl <<"------------ RR: CTransENSolver: Postprocessing - Start ------------" << endl;
 
   /*--- Compute e^N model gradients. ---*/
 
@@ -309,7 +309,7 @@ void CTransENSolver::Viscous_Residual(unsigned long iEdge, CGeometry* geometry, 
 void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_container,
                                      CNumerics **numerics_container, CConfig *config, unsigned short iMesh) {
 
-  cout << endl <<"------------ RR: CTransENSolver: Source residual - Start ------------" << endl;
+  //cout << endl <<"------------ RR: CTransENSolver: Source residual - Start ------------" << endl;
   
   const bool implicit = (config->GetKind_TimeIntScheme() == EULER_IMPLICIT);
 

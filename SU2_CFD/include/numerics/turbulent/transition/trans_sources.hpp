@@ -165,7 +165,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       /*--- Source ---*/
       Residual = P_amplification * Volume;
 
-      if (dist_i <= 1e-4) {
+      /*if (dist_i <= 1e-4) {
       cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<endl;
       cout<<"H_12 = "<<H_12<<" H_L = "<<H_L<<". u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<endl;
       cout<<"DH12 = "<<DH_12<<" lH_12 = "<<lH_12<<". mH_12 = "<<mH_12<<". S = "<<StrainMag_i<<". d = "<<dist_i<<endl;
@@ -175,7 +175,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
 
       cout<<"Residual = "<<Residual<<endl;
       cout<<"Jacobian_i = "<<Jacobian_i[0]<<endl;
-      }
+      }*/
 
       /*--- Implicit part ---*/
       Jacobian_i[0] *= Volume;
