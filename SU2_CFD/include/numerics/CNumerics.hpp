@@ -711,7 +711,7 @@ public:
    * \param[in] amplification_factor_i - Value of the amplification factor at point i.
    * \param[in] amplification_factor_j - Value of the amplification factor at point j.
    */
-  virtual void SetAmplificationFactor(su2double val_amplification_factor_i, su2double val_amplification_factor_j) {
+  void SetAmplificationFactor(su2double val_amplification_factor_i, su2double val_amplification_factor_j) {
     amplification_factor_i = val_amplification_factor_i;
 	amplification_factor_j = val_amplification_factor_j;
   };

@@ -53,6 +53,8 @@ void CSingleGridIntegration::SingleGrid_Iteration(CGeometry ****geometry, CSolve
   solvers_fine[Solver_Position]->Preprocessing(geometry_fine, solvers_fine, config[iZone],
                                                FinestMesh, 0, RunTime_EqSystem, false);
 
+  cout << endl <<"------------ RR: CSingleGridIntegration: SingleGrid_iteration - Preprocessing done ------------" << endl;
+
   /*--- Set the old solution ---*/
 
   solvers_fine[Solver_Position]->Set_OldSolution();
@@ -62,19 +64,27 @@ void CSingleGridIntegration::SingleGrid_Iteration(CGeometry ****geometry, CSolve
   solvers_fine[Solver_Position]->SetTime_Step(geometry_fine, solvers_fine, config[iZone],
                                               FinestMesh, config[iZone]->GetTimeIter());
 
+  cout << endl <<"------------ RR: CSingleGridIntegration: SingleGrid_iteration - Get timestep done ------------" << endl;
+
   /*--- Space integration ---*/
 
   Space_Integration(geometry_fine, solvers_fine,
                     numerics_container[iZone][iInst][FinestMesh][Solver_Position],
                     config[iZone], FinestMesh, NO_RK_ITER, RunTime_EqSystem);
 
+  cout << endl <<"------------ RR: CSingleGridIntegration: SingleGrid_iteration - Space integration done ------------" << endl;
+
   /*--- Time integration ---*/
 
   Time_Integration(geometry_fine, solvers_fine, config[iZone], NO_RK_ITER, RunTime_EqSystem);
 
+  cout << endl <<"------------ RR: CSingleGridIntegration: SingleGrid_iteration - Time integration done ------------" << endl;
+
   /*--- Postprocessing ---*/
 
   solvers_fine[Solver_Position]->Postprocessing(geometry_fine, solvers_fine, config[iZone], FinestMesh);
+
+  cout << endl <<"------------ RR: CSingleGridIntegration: SingleGrid_iteration - Postprocessing done ------------" << endl;
 
   if (RunTime_EqSystem == RUNTIME_HEAT_SYS) {
     SU2_OMP_SAFE_GLOBAL_ACCESS(solvers_fine[HEAT_SOL]->Heat_Fluxes(geometry_fine, solvers_fine, config[iZone]);)

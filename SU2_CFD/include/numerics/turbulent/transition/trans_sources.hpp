@@ -46,7 +46,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
   g_sep_i,
   g_sep_j;*/
 
-  su2double Vorticity;
+  //su2double Vorticity;
   su2double Residual, *Jacobian_i;
   su2double Jacobian_Buffer; /*!< \brief Static storage for the Jacobian (which needs to be pointer for return type). */
 
@@ -72,6 +72,8 @@ class CSourcePieceWise_TransEN final : public CNumerics {
    */
   ResidualType<> ComputeResidual(const CConfig* config) override {
 
+	//cout << endl <<"------------ RR: trans_source: Residual - Start ------------" << endl;
+
     AD::StartPreacc();
     AD::SetPreaccIn(V_i[idx.Density()], V_i[idx.Pressure()], V_i[idx.LaminarViscosity()], StrainMag_i, ScalarVar_i[0], Volume, dist_i);
     AD::SetPreaccIn(&V_i[idx.Velocity()], nDim);
@@ -83,9 +85,11 @@ class CSourcePieceWise_TransEN final : public CNumerics {
     su2double p 	= V_i[idx.Pressure()];
     su2double muLam = V_i[idx.LaminarViscosity()];
 
-    su2double VorticityMag = sqrt(Vorticity_i[0]*Vorticity_i[0] +
+    /*su2double VorticityMag = sqrt(Vorticity_i[0]*Vorticity_i[0] +
                                   Vorticity_i[1]*Vorticity_i[1] +
-                                  Vorticity_i[2]*Vorticity_i[2]);
+                                  Vorticity_i[2]*Vorticity_i[2]);*/
+
+    const su2double VorticityMag = GeometryToolbox::Norm(3, Vorticity_i);
 
     const su2double vel_u = V_i[idx.Velocity()];
     const su2double vel_v = V_i[1+idx.Velocity()];
@@ -107,9 +111,17 @@ class CSourcePieceWise_TransEN final : public CNumerics {
     Residual = 0.0;
     Jacobian_i[0] = 0.0;
 
+    /*--- Failsafe for zero values to prevent NaN results ---*/
+    if (p <= 0) p = 1e-30;
+    if (pInf == 0) pInf = 1e-30;
+    if (rho == 0) rho = 1e-30;
+    if (rhoInf == 0) rhoInf = 1e-30;
+
     if (dist_i > 1e-10) {
 
-      const su2double rho_e 	= pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
+      //su2double rho_e 	= pow(((pow(rhoInf,Gamma)/max(pInf,1e-20))*p),(1/Gamma));
+      su2double rho_e 	= pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
+      rho_e = max(rho_e,1e-20);
 
       /*--- Estimate of the flow velocity at the edge of the boundary layer ---*/
       const su2double G_over_Gminus_one = Gamma/(Gamma-1);
@@ -153,12 +165,28 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       /*--- Source ---*/
       Residual = P_amplification * Volume;
 
+      if (dist_i <= 1e-4) {
+      cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<endl;
+      cout<<"H_12 = "<<H_12<<" H_L = "<<H_L<<". u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<endl;
+      cout<<"DH12 = "<<DH_12<<" lH_12 = "<<lH_12<<". mH_12 = "<<mH_12<<". S = "<<StrainMag_i<<". d = "<<dist_i<<endl;
+      cout<<"Re_y = "<<Re_y<<" Re_y_0 = "<<Re_y_0<<" k_y = "<<k_y<<" Re_d2_0 = "<<Re_d2_0<<endl;
+      cout<<"rho = "<<rho<<" VorticityMag = "<<VorticityMag<<" F_crit = "<<F_crit<<" F_growth = "<<F_growth<<" dn_over_dRe_d2 = "<<dn_over_dRe_d2<<endl;
+      cout<<"Production term = "<<P_amplification<<endl;
+
+      cout<<"Residual = "<<Residual<<endl;
+      cout<<"Jacobian_i = "<<Jacobian_i[0]<<endl;
+      }
+
       /*--- Implicit part ---*/
       Jacobian_i[0] *= Volume;
     }
-  
+
     AD::SetPreaccOut(Residual);
     AD::EndPreacc();
+
+    //cout<<"n factor = "<<TransVar_i[0]<<endl;
+
+    //cout << endl <<"------------ RR: trans_source: Residual -Done ------------" << endl;
 
     return ResidualType<>(&Residual, &Jacobian_i, nullptr);
   }

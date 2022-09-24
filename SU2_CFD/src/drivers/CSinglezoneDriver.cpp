@@ -74,13 +74,19 @@ void CSinglezoneDriver::StartSolver() {
 
     Preprocess(TimeIter);
 
+    cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Preprocess done ------------" << endl;
+
     /*--- Run a time-step iteration of the single-zone problem. ---*/
 
     Run();
 
+    cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Run done ------------" << endl;
+
     /*--- Perform some postprocessing on the solution before the update ---*/
 
     Postprocess();
+
+    cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Postprocess done ------------" << endl;
 
     /*--- Update the solution for dual time stepping strategy ---*/
 
@@ -134,6 +140,8 @@ void CSinglezoneDriver::Preprocess(unsigned long TimeIter) {
     solver_container[ZONE_0][INST_0][MESH_0][FLOW_SOL]->SetInitialCondition(geometry_container[ZONE_0][INST_0],
                                                                             solver_container[ZONE_0][INST_0],
                                                                             config_container[ZONE_0], TimeIter);
+
+    cout << endl <<"------------ RR: CSinglezoneDriver: Preprocess - Initial conditions for RANS ------------" << endl;
   }
   else if (config_container[ZONE_0]->GetHeatProblem()) {
     /*--- Set the initial condition for HEAT equation ---------------------------------------------*/
@@ -148,6 +156,8 @@ void CSinglezoneDriver::Preprocess(unsigned long TimeIter) {
   if (config_container[ZONE_0]->GetPredictor())
     iteration_container[ZONE_0][INST_0]->Predictor(output_container[ZONE_0], integration_container, geometry_container, solver_container,
         numerics_container, config_container, surface_movement, grid_movement, FFDBox, ZONE_0, INST_0);
+
+  cout << endl <<"------------ RR: CSinglezoneDriver: Preprocess - Predicter step done ------------" << endl;
 
   /*--- Perform a dynamic mesh update if required. ---*/
   /*--- For the Disc.Adj. of a case with (rigidly) moving grid, the appropriate
@@ -165,6 +175,8 @@ void CSinglezoneDriver::Run() {
   /*--- Iterate the zone as a block, either to convergence or to a max number of iterations ---*/
   iteration_container[ZONE_0][INST_0]->Solve(output_container[ZONE_0], integration_container, geometry_container, solver_container,
         numerics_container, config_container, surface_movement, grid_movement, FFDBox, ZONE_0, INST_0);
+
+  cout << endl <<"------------ RR: CSingleZoneDriver: Run - Solve done ------------" << endl;
 
 }
 

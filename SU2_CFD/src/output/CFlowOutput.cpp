@@ -871,7 +871,7 @@ void CFlowOutput::AddHistoryOutputFields_ScalarRMS_RES(const CConfig* config) {
 
     case TURB_TRANS_MODEL::EN:
       /// DESCRIPTION: Root-mean square residual of the Amplification factor (e^N model).
-      AddHistoryOutput("RMS_AMPLIFICATIONFACTOR", "rms[EN_n]",  ScreenOutputFormat::FIXED, "RMS_RES", "Root-mean square residual of amplification (EN model).", HistoryFieldType::RESIDUAL);
+      AddHistoryOutput("RMS_AMPLIFICATION_FACTOR", "rms[n]",  ScreenOutputFormat::FIXED, "RMS_RES", "Root-mean square residual of the amplification factor (EN model)).", HistoryFieldType::RESIDUAL);
       break;
 
     case TURB_TRANS_MODEL::NONE: break;
@@ -904,9 +904,9 @@ void CFlowOutput::AddHistoryOutputFields_ScalarMAX_RES(const CConfig* config) {
 
   switch (config->GetKind_Trans_Model()) {
 
-    case TURB_TRANS_MODEL::LM:
+    case TURB_TRANS_MODEL::EN:
       /// DESCRIPTION: Maximum residual of the amplification factor (EN model).
-      AddHistoryOutput("MAX_AMPLIFICATIONFACTOR", "max[EN_n]",  ScreenOutputFormat::FIXED, "MAX_RES", "Maximum residual of the amplification factor (EN model).", HistoryFieldType::RESIDUAL);
+      AddHistoryOutput("MAX_AMPLIFICATION_FACTOR", "max[n]",  ScreenOutputFormat::FIXED, "MAX_RES", "Maximum residual of the amplification factor (EN model).", HistoryFieldType::RESIDUAL);
       break;
 
     case TURB_TRANS_MODEL::NONE:
@@ -941,9 +941,9 @@ void CFlowOutput::AddHistoryOutputFields_ScalarBGS_RES(const CConfig* config) {
 
   switch (config->GetKind_Trans_Model()) {
 
-    case TURB_TRANS_MODEL::LM:
+    case TURB_TRANS_MODEL::EN:
       /// DESCRIPTION: Maximum residual of the amplification factor (EN model).
-      AddHistoryOutput("BGS_AMPLIFICATIONFACTOR", "bgs[EN_n]",  ScreenOutputFormat::FIXED, "BGS_RES", "BGS residual of the amplification factor (EN model).", HistoryFieldType::RESIDUAL);
+      AddHistoryOutput("BGS_AMPLIFICATION_FACTOR", "bgs[n]",  ScreenOutputFormat::FIXED, "BGS_RES", "BGS residual of the amplification factor (EN model).", HistoryFieldType::RESIDUAL);
       break;
 
     case TURB_TRANS_MODEL::NONE:
@@ -1006,10 +1006,10 @@ void CFlowOutput::LoadHistoryData_Scalar(const CConfig* config, const CSolver* c
 
   switch (config->GetKind_Trans_Model()) {
 	case TURB_TRANS_MODEL::EN:
-	  SetHistoryOutputValue("RMS_AMPLIFICATIONFACTOR", log10(solver[TRANS_SOL]->GetRes_RMS(0)));
-	  SetHistoryOutputValue("MAX_AMPLIFICATIONFACTOR", log10(solver[TRANS_SOL]->GetRes_Max(0)));
+	  SetHistoryOutputValue("RMS_AMPLIFICATION_FACTOR", log10(solver[TRANS_SOL]->GetRes_RMS(0)));
+	  SetHistoryOutputValue("MAX_AMPLIFICATION_FACTOR", log10(solver[TRANS_SOL]->GetRes_Max(0)));
 	  if (multiZone) {
-		SetHistoryOutputValue("BGS_AMPLIFICATIONFACTOR", log10(solver[TRANS_SOL]->GetRes_BGS(0)));
+		SetHistoryOutputValue("BGS_AMPLIFICATION_FACTOR", log10(solver[TRANS_SOL]->GetRes_BGS(0)));
 	  }
 	  break;
 
@@ -1047,7 +1047,7 @@ void CFlowOutput::SetVolumeOutputFields_ScalarSolution(const CConfig* config){
 
   switch (config->GetKind_Trans_Model()) {
     case TURB_TRANS_MODEL::EN:
-      AddVolumeOutput("AMPLIFICATIONFACTOR", "EN_n", "SOLUTION", "EN AMPLIFICATION");
+      AddVolumeOutput("AMPLIFICATION_FACTOR", "n", "SOLUTION", "e^N transition Amplification Factor");
       break;
 
     case TURB_TRANS_MODEL::NONE:
@@ -1077,7 +1077,7 @@ void CFlowOutput::SetVolumeOutputFields_ScalarResidual(const CConfig* config) {
 
   switch (config->GetKind_Trans_Model()) {
     case TURB_TRANS_MODEL::EN:
-      AddVolumeOutput("RES_AMPLIFICATIONFACTOR", "Residual_EN_AMLIFICATION", "RESIDUAL", "Residual of e^N amplification factor");
+      AddVolumeOutput("RES_AMPLIFICATION_FACTOR", "Residual_EN_AMLIFICATION", "RESIDUAL", "Residual of the amplification factor (EN model)");
       break;
 
     case TURB_TRANS_MODEL::NONE:
@@ -1196,8 +1196,8 @@ void CFlowOutput::LoadVolumeData_Scalar(const CConfig* config, const CSolver* co
 
   switch (config->GetKind_Trans_Model()) {
     case TURB_TRANS_MODEL::EN:
-      SetVolumeOutputValue("AMPLIFICATIONFACTOR", iPoint, Node_Trans->GetSolution(iPoint, 0));
-      SetVolumeOutputValue("RES_AMPLIFICATION", iPoint, trans_solver->LinSysRes(iPoint, 0));
+      SetVolumeOutputValue("AMPLIFICATION_FACTOR", iPoint, Node_Trans->GetSolution(iPoint, 0));
+      SetVolumeOutputValue("RES_AMPLIFICATION_FACTOR", iPoint, trans_solver->LinSysRes(iPoint, 0));
       break;
 
     case TURB_TRANS_MODEL::NONE: break;

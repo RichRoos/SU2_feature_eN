@@ -156,6 +156,7 @@ class CSourceBase_TurbSA : public CNumerics {
 
       /*--- Compute ft2 term. Also includes boolean for e^N transition model that modifies the ft2 term ---*/
       if(TURB_TRANS_MODEL::EN == config->GetKind_Trans_Model()) {
+
     	  AD::SetPreaccIn(amplification_factor_i);
     	  su2double amplification_factor = amplification_factor_i;
 
@@ -290,6 +291,7 @@ struct Nonzero {
 	} else { //Transition detected
 	  const su2double xsi2 = pow(var.Ji, 2);
 	  var.Ncrit = -8.43 - 2.4*log(var.Tu/100);
+	  //cout<<"Ncrit = "<<var.Ncrit<<". Tu = "<<var.Tu<<endl;
 	  var.ft2 = var.ct3 * (1 - exp(2*(n_hat - var.Ncrit)) ) * exp(-var.ct4 * xsi2);
 	  var.d_ft2 = -2.0 * var.ct4 * var.Ji * var.ft2 * var.d_Ji; //Extra Ncrit part acting as a constant in var.ft2
 	}
