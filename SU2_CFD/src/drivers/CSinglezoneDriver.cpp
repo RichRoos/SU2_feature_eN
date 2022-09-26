@@ -92,6 +92,8 @@ void CSinglezoneDriver::StartSolver() {
 
     Update();
 
+    //cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Update done ------------" << endl;
+
     /*--- Monitor the computations after each iteration. ---*/
 
     Monitor(TimeIter);
@@ -99,6 +101,8 @@ void CSinglezoneDriver::StartSolver() {
     /*--- Output the solution in files. ---*/
 
     Output(TimeIter);
+
+    //cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Output done ------------" << endl;
 
     /*--- Save iteration solution for libROM ---*/
     if (config_container[MESH_0]->GetSave_libROM()) {
@@ -111,6 +115,7 @@ void CSinglezoneDriver::StartSolver() {
     if (StopCalc) break;
 
     TimeIter++;
+    //cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - TimeIter = " <<TimeIter<<"  ------------" << endl;
 
   }
 

@@ -124,7 +124,7 @@ void CFluidIteration::Iterate(COutput* output, CIntegration**** integration, CGe
 	  integration[val_iZone][val_iInst][TRANS_SOL]->SingleGrid_Iteration(geometry, solver, numerics, config,
 																		 RUNTIME_TRANS_SYS, val_iZone, val_iInst);
 
-	 // cout << endl <<"----------------- RR: CFluidIteration: Iterate - Trans SingleGrid iteration done -------------------------------" << endl;
+	  //cout << endl <<"----------------- RR: CFluidIteration: Iterate - Trans SingleGrid iteration done -------------------------------" << endl;
 	}
 
     /*--- Solve the turbulence model ---*/
@@ -253,6 +253,8 @@ bool CFluidIteration::Monitor(COutput* output, CIntegration**** integration, CGe
                               CFreeFormDefBox*** FFDBox, unsigned short val_iZone, unsigned short val_iInst) {
   bool StopCalc = false;
 
+  //cout << endl <<"------------ RR: CFluidIteration: Solve - Monitor start ------------" << endl;
+
   StopTime = SU2_MPI::Wtime();
 
   UsedTime = StopTime - StartTime;
@@ -273,6 +275,8 @@ bool CFluidIteration::Monitor(COutput* output, CIntegration**** integration, CGe
                                config[val_iZone]);
   }
 
+  //cout << endl <<"------------ RR: CFluidIteration: Solve - Monitor stop ------------" << endl;
+
   return StopCalc;
 }
 
@@ -280,6 +284,8 @@ void CFluidIteration::Postprocess(COutput* output, CIntegration**** integration,
                                   CSolver***** solver, CNumerics****** numerics, CConfig** config,
                                   CSurfaceMovement** surface_movement, CVolumetricMovement*** grid_movement,
                                   CFreeFormDefBox*** FFDBox, unsigned short val_iZone, unsigned short val_iInst) {
+
+  //cout << endl <<"------------ RR: CFluidIteration: Solve - Postprocess done ------------" << endl;
 
   /*--- Temporary: enable only for single-zone driver. This should be removed eventually when generalized. ---*/
   if (config[val_iZone]->GetSinglezone_Driver()) {

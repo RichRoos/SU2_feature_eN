@@ -346,11 +346,12 @@ void CTurbSASolver::Source_Residual(CGeometry *geometry, CSolver **solver_contai
 
     }
 
-    if (transition_EN) {
+    //if (transition_EN) {
       //cout << endl <<"------------ RR: CTurbSASolver: Source residual - Transition n factor set ------------" << endl;
-      numerics-> SetAmplificationFactor(solver_container[TRANS_SOL]->GetNodes()->GetSolution(iPoint,0), 0.0); //GetAmplificationFactor(iPoint), 0.0);
+      //numerics-> SetAmplificationFactor(solver_container[TRANS_SOL]->GetNodes()->GetSolution(iPoint,0), 0.0);
+      //if (iPoint == 150) cout<<"SA numeric set Amplification = "<<solver_container[TRANS_SOL]->GetNodes()->GetSolution(iPoint,0)<<endl;
       //cout<<"n factor = "<<solver_container[TRANS_SOL]->GetNodes()->GetSolution(iPoint,0)<<endl;
-	}
+	//}
 
     /*--- Compute the source term ---*/
 
@@ -392,10 +393,10 @@ void CTurbSASolver::Source_Residual(CGeometry *geometry, CSolver **solver_contai
 
   AD::EndNoSharedReading();
 
-  int poin = 150;
+  /*int poin = 150;
   cout<<"\nAfter SA source residual, with iPoint = "<<poin<<" :"<<endl;
   cout<<"Amplification = "<<solver_container[TRANS_SOL]->GetNodes()->GetSolution(poin,0)<<endl;
-  cout<<"nu = "<<nodes->GetSolution(poin,0)<<". muT = "<<solver_container[TURB_SOL]->GetNodes()->GetmuT(poin)<<endl<<endl;
+  cout<<"nu = "<<nodes->GetSolution(poin,0)<<". muT = "<<solver_container[TURB_SOL]->GetNodes()->GetmuT(poin)<<endl<<endl;*/
 
 }
 

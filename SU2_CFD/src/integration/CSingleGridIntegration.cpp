@@ -113,6 +113,22 @@ void CSingleGridIntegration::SingleGrid_Iteration(CGeometry ****geometry, CSolve
 
   }
 
+  /*--- If transition model, copy the transition variables to the coarse levels ---*/
+
+  if (RunTime_EqSystem == RUNTIME_TRANS_SYS) {
+
+      for (unsigned short iMesh = FinestMesh; iMesh < config[iZone]->GetnMGLevels(); iMesh++) {
+
+        SetRestricted_Solution(RunTime_EqSystem,
+                               solver_container[iZone][iInst][iMesh][Solver_Position],
+                               solver_container[iZone][iInst][iMesh+1][Solver_Position],
+                               geometry[iZone][iInst][iMesh],
+                               geometry[iZone][iInst][iMesh+1],
+                               config[iZone]);
+      }
+
+    }
+
   }
   END_SU2_OMP_PARALLEL
 }

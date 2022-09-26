@@ -161,6 +161,7 @@ class CSourceBase_TurbSA : public CNumerics {
 
     	  AD::SetPreaccIn(amplification_factor_i);
     	  su2double amplification_factor = amplification_factor_i;
+    	  //cout<<"SA turb Amplification = "<<amplification_factor_i<<endl;
 
     	  var.transEN = true;
     	  var.ct4 = 0.05;
