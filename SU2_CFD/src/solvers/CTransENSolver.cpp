@@ -345,6 +345,11 @@ void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
     numerics->SetTransVar(nodes->GetSolution(iPoint), nullptr);
     numerics->SetTransVarGradient(nodes->GetGradient(iPoint), nullptr);
 
+    /*--- Explicit amplification set ---*/
+    numerics-> SetAmplificationFactor(nodes->GetSolution(iPoint,0), 0.0);
+
+    //if (iPoint == 150) cout<<"EN numeric set Amplification = "<<nodes->GetSolution(iPoint,0)<<endl;
+
     //cout << endl <<"------------ RR: CTransENSolver: Source residual - Transvariables set ------------" << endl;
 
     /*--- Set volume ---*/
@@ -382,11 +387,11 @@ void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
   AD::EndNoSharedReading();
 
-  int poin = 150;
+  /*int poin = 150;
   cout<<"\nAfter EN source residual, with iPoint = "<<poin<<" :"<<endl;
   cout<<"Amplification Factor inf = "<<Solution_Inf[0]<<". Amplification = "<<nodes->GetSolution(poin,0)<<endl;
   cout<<"nu = "<<solver_container[TURB_SOL]->GetNodes()->GetSolution(poin,0)<<". muT = "<<solver_container[TURB_SOL]->GetNodes()->GetmuT(poin)<<endl<<endl;
-
+*/
 }
 
 void CTransENSolver::Source_Template(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics,
