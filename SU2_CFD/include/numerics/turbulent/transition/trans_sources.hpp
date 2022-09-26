@@ -119,17 +119,20 @@ class CSourcePieceWise_TransEN final : public CNumerics {
 
     if (dist_i > 1e-10) {
 
-      //su2double rho_e 	= pow(((pow(rhoInf,Gamma)/max(pInf,1e-20))*p),(1/Gamma));
       su2double rho_e 	= pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
-      rho_e = max(rho_e,1e-20);
+      rho_e = max(rho_e,1e-20); //Again for nan values
 
       /*--- Estimate of the flow velocity at the edge of the boundary layer ---*/
       const su2double G_over_Gminus_one = Gamma/(Gamma-1);
 
+      //su2double ue_check 		= max(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e),1e-30);
+      //const su2double u_e 		= pow(2*ue_check,0.5);
       const su2double u_e 		= pow(2*(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e)),0.5);
 
-      /*--- Local pressure-gradient parameter for the boundary layer shape factor ---*/
-      const su2double H_L 		= (StrainMag_i*dist_i)/u_e;
+      /*--- Local pressure-gradient parameter for the boundary layer shape factor. Minimum value of 0.328 for stability ---*/
+      su2double H_L 		= (StrainMag_i*dist_i)/u_e;
+      if ((isnan(H_L)) || (H_L < 0.328)) H_L = 0.328;
+      //const su2double H_L 		= max(H_L1,0.328);
 
       /*--- Integral shape factor ---*/
       const su2double H_12 		= 13.9766*pow(H_L,4) - 22.9166*pow(H_L,3) + 13.7227*pow(H_L,2) - 1.0023*H_L + 1.6778;
@@ -165,8 +168,8 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       /*--- Source ---*/
       Residual = P_amplification * Volume;
 
-      /*if (dist_i <= 1e-4) {
-      cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<endl;
+      //if (dist_i <= 1e-4) {
+      /*cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<endl;
       cout<<"H_12 = "<<H_12<<" H_L = "<<H_L<<". u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<endl;
       cout<<"DH12 = "<<DH_12<<" lH_12 = "<<lH_12<<". mH_12 = "<<mH_12<<". S = "<<StrainMag_i<<". d = "<<dist_i<<endl;
       cout<<"Re_y = "<<Re_y<<" Re_y_0 = "<<Re_y_0<<" k_y = "<<k_y<<" Re_d2_0 = "<<Re_d2_0<<endl;
@@ -174,8 +177,8 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       cout<<"Production term = "<<P_amplification<<endl;
 
       cout<<"Residual = "<<Residual<<endl;
-      cout<<"Jacobian_i = "<<Jacobian_i[0]<<endl;
-      }*/
+      cout<<"Jacobian_i = "<<Jacobian_i[0]<<endl;*/
+      //}
 
       /*--- Implicit part ---*/
       Jacobian_i[0] *= Volume;

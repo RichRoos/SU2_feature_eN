@@ -251,6 +251,7 @@ void CTurbSASolver::Postprocessing(CGeometry *geometry, CSolver **solver_contain
   END_SU2_OMP_FOR
 
   AD::EndNoSharedReading();
+
 }
 
 void CTurbSASolver::Viscous_Residual(unsigned long iEdge, CGeometry* geometry, CSolver** solver_container,
@@ -390,6 +391,11 @@ void CTurbSASolver::Source_Residual(CGeometry *geometry, CSolver **solver_contai
   }
 
   AD::EndNoSharedReading();
+
+  int poin = 150;
+  cout<<"\nAfter SA source residual, with iPoint = "<<poin<<" :"<<endl;
+  cout<<"Amplification = "<<solver_container[TRANS_SOL]->GetNodes()->GetSolution(poin,0)<<endl;
+  cout<<"nu = "<<nodes->GetSolution(poin,0)<<". muT = "<<solver_container[TURB_SOL]->GetNodes()->GetmuT(poin)<<endl<<endl;
 
 }
 

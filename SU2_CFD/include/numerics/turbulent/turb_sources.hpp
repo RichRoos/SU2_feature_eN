@@ -40,7 +40,6 @@ struct CSAVariables {
   const su2double cb1 = 0.1355;
   const su2double cw2 = 0.3;
   const su2double ct3 = 1.2;
-  const su2double ct4 = 0.5;
   const su2double cw3_6 = pow(2, 6);
   const su2double sigma = 2.0 / 3.0;
   const su2double cb2 = 0.622;
@@ -48,8 +47,11 @@ struct CSAVariables {
   const su2double cw1 = cb1 / k2 + (1 + cb2) / sigma;
   const su2double cr1 = 0.5;
 
+  /*--- List of non-const constants ---*/
+  su2double ct4 = 0.5;
+
   /*--- List of auxiliary functions ---*/
-  su2double ft2, d_ft2, r, d_r, g, d_g, glim, fw, d_fw, Ji, d_Ji, S, Shat, d_Shat, fv1, d_fv1, fv2, d_fv2, Tu, Ncrit;
+  su2double ft2, d_ft2, r, d_r, g, d_g, glim, fw, d_fw, Ji, d_Ji, S, Shat, d_Shat, fv1, d_fv1, fv2, d_fv2, Ncrit;
 
   /*--- List of helpers ---*/
   su2double Omega, dist_i_2, inv_k2_d2, inv_Shat, g_6, norm2_Grad, gamma_bc;
@@ -161,7 +163,10 @@ class CSourceBase_TurbSA : public CNumerics {
     	  su2double amplification_factor = amplification_factor_i;
 
     	  var.transEN = true;
-    	  var.Tu = 100.0 * config->GetTurbulenceIntensity_FreeStream();
+    	  var.ct4 = 0.05;
+    	  const su2double Tu = 100.0 * config->GetTurbulenceIntensity_FreeStream();
+    	  var.Ncrit = -8.43 - 2.4*log(Tu/100);
+
     	  ft2::get(amplification_factor, var);
       } else {
     	  ft2::get(1.0, var);
@@ -216,6 +221,11 @@ class CSourceBase_TurbSA : public CNumerics {
 
       Residual = (Production - Destruction + CrossProduction) * Volume;
       Jacobian_i[0] *= Volume;
+
+      //cout<<"Amplification factor = "<<amplification_factor_i<<endl;
+      //cout<<"SA Residual = "<<Residual<<endl;
+      //cout<<"SA Jacobian_i = "<<Jacobian_i[0]<<endl;
+      //cout<<"Production term = "<<Production<<endl;
     }
 
     AD::SetPreaccOut(Residual);
@@ -282,7 +292,7 @@ struct Zero {
 
 /*! \brief Non-zero ft2 term according to the literature. */
 struct Nonzero {
-  static void get(const su2double& n_hat, CSAVariables& var) {
+  static void get(const su2double& amplification, CSAVariables& var) {
 	if (var.transEN == false){
       const su2double xsi2 = pow(var.Ji, 2);
       var.ft2 = var.ct3 * exp(-var.ct4 * xsi2);
@@ -290,9 +300,7 @@ struct Nonzero {
 
 	} else { //Transition detected
 	  const su2double xsi2 = pow(var.Ji, 2);
-	  var.Ncrit = -8.43 - 2.4*log(var.Tu/100);
-	  //cout<<"Ncrit = "<<var.Ncrit<<". Tu = "<<var.Tu<<endl;
-	  var.ft2 = var.ct3 * (1 - exp(2*(n_hat - var.Ncrit)) ) * exp(-var.ct4 * xsi2);
+	  var.ft2 = var.ct3 * (1 - exp(2*(amplification - var.Ncrit)) ) * exp(-var.ct4 * xsi2);
 	  var.d_ft2 = -2.0 * var.ct4 * var.Ji * var.ft2 * var.d_Ji; //Extra Ncrit part acting as a constant in var.ft2
 	}
   }

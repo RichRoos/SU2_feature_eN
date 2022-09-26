@@ -124,17 +124,17 @@ void CFluidIteration::Iterate(COutput* output, CIntegration**** integration, CGe
 	  integration[val_iZone][val_iInst][TRANS_SOL]->SingleGrid_Iteration(geometry, solver, numerics, config,
 																		 RUNTIME_TRANS_SYS, val_iZone, val_iInst);
 
-	  //cout << endl <<"----------------- RR: CFluidIteration: Iterate - Trans SingleGrid iteration done -------------------------------" << endl;
+	 // cout << endl <<"----------------- RR: CFluidIteration: Iterate - Trans SingleGrid iteration done -------------------------------" << endl;
 	}
 
     /*--- Solve the turbulence model ---*/
 
-	//cout << endl <<"------------------- RR: CFluidIteration: Iterate - Turb SingleGrid iteration starting ------------------------------" << endl;
+	//cout << endl <<"------------------ RR: CFluidIteration: Iterate - Turb SingleGrid iteration starting ------------------------------" << endl;
     config[val_iZone]->SetGlobalParam(main_solver, RUNTIME_TURB_SYS);
     integration[val_iZone][val_iInst][TURB_SOL]->SingleGrid_Iteration(geometry, solver, numerics, config,
                                                                       RUNTIME_TURB_SYS, val_iZone, val_iInst);
 
-    //cout << endl <<"------------------- RR: CFluidIteration: Iterate - Turb SingleGrid iteration done -----------------------------------" << endl;
+    //cout << endl <<"------------------ RR: CFluidIteration: Iterate - Turb SingleGrid iteration done -----------------------------------" << endl;
   }
 
   if (config[val_iZone]->GetKind_Species_Model() != SPECIES_MODEL::NONE){
