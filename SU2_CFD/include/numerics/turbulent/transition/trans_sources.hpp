@@ -168,6 +168,9 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       /*--- Source ---*/
       Residual = P_amplification * Volume;
 
+      /*--- Implicit part ---*/
+	  Jacobian_i[0] = - (VorticityMag*F_crit*F_growth) * Volume;
+
       //if (dist_i <= 1e-4) {
       /*cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<endl;
       cout<<"H_12 = "<<H_12<<" H_L = "<<H_L<<". u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<endl;
@@ -176,12 +179,10 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       cout<<"rho = "<<rho<<" VorticityMag = "<<VorticityMag<<" F_crit = "<<F_crit<<" F_growth = "<<F_growth<<" dn_over_dRe_d2 = "<<dn_over_dRe_d2<<endl;
       cout<<"Production term = "<<P_amplification<<endl;
 
-      cout<<"Residual = "<<Residual<<endl;
-      cout<<"Jacobian_i = "<<Jacobian_i[0]<<endl;*/
+      cout<<"EN Residual = "<<Residual<<endl;
+      cout<<"EN Jacobian_i = "<<Jacobian_i[0]<<endl;*/
       //}
 
-      /*--- Implicit part ---*/
-      Jacobian_i[0] *= Volume;
     }
 
     AD::SetPreaccOut(Residual);

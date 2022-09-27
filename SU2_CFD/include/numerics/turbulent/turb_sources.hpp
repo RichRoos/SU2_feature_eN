@@ -165,8 +165,9 @@ class CSourceBase_TurbSA : public CNumerics {
 
     	  var.transEN = true;
     	  var.ct4 = 0.05;
-    	  const su2double Tu = 100.0 * config->GetTurbulenceIntensity_FreeStream();
-    	  var.Ncrit = -8.43 - 2.4*log(Tu/100);
+    	  //const su2double Tu = 100*config->GetTurbulenceIntensity_FreeStream();
+    	  var.Ncrit = -8.43 - 2.4*log(config->GetTurbulenceIntensity_FreeStream()/100);
+    	  //cout<<"Ncrit = "<<var.Ncrit<<endl;
 
     	  ft2::get(amplification_factor, var);
       } else {
@@ -224,9 +225,9 @@ class CSourceBase_TurbSA : public CNumerics {
       Jacobian_i[0] *= Volume;
 
       //cout<<"Amplification factor = "<<amplification_factor_i<<endl;
-      //cout<<"SA Residual = "<<Residual<<endl;
-      //cout<<"SA Jacobian_i = "<<Jacobian_i[0]<<endl;
-      //cout<<"Production term = "<<Production<<endl;
+      /*cout<<"SA Residual = "<<Residual<<endl;
+      cout<<"SA Jacobian_i = "<<Jacobian_i[0]<<endl;
+      cout<<"SA Production term = "<<Production<<endl;*/
     }
 
     AD::SetPreaccOut(Residual);
