@@ -112,27 +112,30 @@ class CSourcePieceWise_TransEN final : public CNumerics {
     Jacobian_i[0] = 0.0;
 
     /*--- Failsafe for zero values to prevent NaN results ---*/
-    if (p <= 0) p = 1e-30;
+    /*if (p <= 0) p = 1e-30;
     if (pInf == 0) pInf = 1e-30;
     if (rho == 0) rho = 1e-30;
-    if (rhoInf == 0) rhoInf = 1e-30;
+    if (rhoInf == 0) rhoInf = 1e-30;*/
 
     if (dist_i > 1e-10) {
 
-      su2double rho_e 	= pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
-      rho_e = max(rho_e,1e-20); //Again for nan values
+      su2double H_L;
+      if (config->GetKind_Regime() == ENUM_REGIME::COMPRESSIBLE) {
+    	su2double rho_e = pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
+		//rho_e = max(rho_e,1e-20); //Again for nan values
 
-      /*--- Estimate of the flow velocity at the edge of the boundary layer ---*/
-      const su2double G_over_Gminus_one = Gamma/(Gamma-1);
+		/*--- Estimate of the flow velocity at the edge of the boundary layer ---*/
+		const su2double G_over_Gminus_one = Gamma/(Gamma-1);
 
-      //su2double ue_check 		= max(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e),1e-30);
-      //const su2double u_e 		= pow(2*ue_check,0.5);
-      const su2double u_e 		= pow(2*(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e)),0.5);
+		const su2double u_e = pow(2*(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e)),0.5);
 
-      /*--- Local pressure-gradient parameter for the boundary layer shape factor. Minimum value of 0.328 for stability ---*/
-      su2double H_L 		= (StrainMag_i*dist_i)/u_e;
-      if ((isnan(H_L)) || (H_L < 0.328)) H_L = 0.328;
-      //const su2double H_L 		= max(H_L1,0.328);
+		/*--- Local pressure-gradient parameter for the boundary layer shape factor. Minimum value of 0.328 for stability ---*/
+		su2double H_L = (StrainMag_i*dist_i)/u_e;
+		if ((isnan(H_L)) || (H_L < 0.328)) H_L = 0.328;
+
+      } else {
+    	SU2_MPI::Error("Sa-FT2-eN Transition model for incompressible flow under production", CURRENT_FUNCTION);
+      }
 
       /*--- Integral shape factor ---*/
       const su2double H_12 		= 13.9766*pow(H_L,4) - 22.9166*pow(H_L,3) + 13.7227*pow(H_L,2) - 1.0023*H_L + 1.6778;
