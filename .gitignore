@@ -101,4 +101,4 @@ externals/meson
 subprojects/Mutationpp
 
 # ignore the QuickStart directory
-QuickStart /
+QuickStart/*
