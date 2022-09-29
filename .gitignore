@@ -99,3 +99,6 @@ ninja
 .vscode/
 externals/meson
 subprojects/Mutationpp
+
+# ignore the QuickStart directory
+QuickStart /
