@@ -227,6 +227,7 @@ class CSourceBase_TurbSA : public CNumerics {
       Jacobian_i[0] *= Volume;
 
       su2double p = V_i[idx.Pressure()];
+      su2double pref = config->GetPressure_Ref();
       su2double rhoInf = config->GetDensity_FreeStreamND();
       su2double pInf = config->GetPressure_FreeStreamND();
       const su2double *velInf 	= config->GetVelocity_FreeStreamND();
@@ -239,15 +240,18 @@ class CSourceBase_TurbSA : public CNumerics {
 	  const su2double u_e = pow(2*(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e)),0.5);
 	  su2double H_L = max(((StrainMag_i*dist_i)/u_e),0.328);
 
-	  if (p < pInf){
-	  cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<endl;
-	  cout<<"u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<endl<<endl;
+	  //if (p < pInf){
+	  cout<<"SA production = "<<Production<<". SA destruction = "<<Destruction<<". SA CrossProduction = "<<CrossProduction<<endl;
+
+	  cout<<"SA rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<endl;
+	  cout<<"SA u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<". pref = "<<pref<<endl;
+	  cout<<"SA S = "<<StrainMag_i<<". d = "<<dist_i<<endl;
       //cout<<"Amplification factor = "<<amplification_factor_i<<endl;
+	  cout<<"SA Production term = "<<Production<<endl;
       cout<<"SA Residual = "<<Residual<<endl;
-      cout<<"SA Jacobian_i = "<<Jacobian_i[0]<<endl;
-      cout<<"SA Production term = "<<Production<<endl;
-      cout<<"S = "<<StrainMag_i<<". d = "<<dist_i<<endl;
-	  }
+      cout<<"SA Jacobian_i = "<<Jacobian_i[0]<<endl<<endl;
+	  //}
+
 
     }
 

@@ -348,7 +348,7 @@ void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
     /*--- Set Amplification specifically ---*/
     numerics-> SetAmplificationFactor(nodes->GetSolution(iPoint,0), 0.0);
 
-    cout<<"EN numeric set Amplification = "<<nodes->GetSolution(iPoint,0)<<endl;
+    //cout<<"EN numeric set Amplification = "<<nodes->GetSolution(iPoint,0)<<endl;
 
     //cout << endl <<"------------ RR: CTransENSolver: Source residual - Transvariables set ------------" << endl;
 

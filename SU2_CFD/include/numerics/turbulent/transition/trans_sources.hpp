@@ -85,10 +85,6 @@ class CSourcePieceWise_TransEN final : public CNumerics {
     su2double p 	= V_i[idx.Pressure()];
     su2double muLam = V_i[idx.LaminarViscosity()];
 
-    /*su2double VorticityMag = sqrt(Vorticity_i[0]*Vorticity_i[0] +
-                                  Vorticity_i[1]*Vorticity_i[1] +
-                                  Vorticity_i[2]*Vorticity_i[2]);*/
-
     const su2double VorticityMag = GeometryToolbox::Norm(3, Vorticity_i);
 
     const su2double vel_u = V_i[idx.Velocity()];
@@ -111,9 +107,11 @@ class CSourcePieceWise_TransEN final : public CNumerics {
     Residual = 0.0;
     Jacobian_i[0] = 0.0;
 
+    const bool printch = true;
+
     if (dist_i > 1e-10) {
 
-      su2double H_L;
+      su2double H_L, HL1;
       if (config->GetKind_Regime() == ENUM_REGIME::COMPRESSIBLE) {
     	su2double rho_e = pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
 
@@ -123,12 +121,17 @@ class CSourcePieceWise_TransEN final : public CNumerics {
 		const su2double u_e = pow(2*(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e)),0.5);
 
 		/*--- Local pressure-gradient parameter for the boundary layer shape factor. Minimum value of 0.328 for stability ---*/
+		//HL1 = (StrainMag_i*dist_i)/u_e;
+		//H_L = max(HL1,0.328);
 		H_L = max(((StrainMag_i*dist_i)/u_e),0.328);
 
-		cout<<"u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<endl;
+		if (printch){
+	    cout<<"pfraction = "<<pInf/rhoInf  - p/rho_e<<endl;
+		cout<<"u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<". HL1 = "<<HL1<<endl;
+		}
 
       } else {
-    	SU2_MPI::Error("Sa-FT2-eN Transition model for incompressible flow under production", CURRENT_FUNCTION);
+    	SU2_MPI::Error("Sa-FT2-eN Transition model for incompressible flow is under production", CURRENT_FUNCTION);
       }
 
       /*--- Integral shape factor ---*/
@@ -143,7 +146,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
 
       const su2double F_growth 	= DH_12*((1 + mH_12)*lH_12)/2;
 
-      /*--- F critical parameters ---*/
+      /*--- F crit parameters ---*/
       const su2double Re_y 		= (rho*vel_mag*dist_i)/muLam;
       const su2double k_y 		= -0.00315*pow(H_12,3) + 0.0986*pow(H_12,2) - 0.242*H_12 + 3.739;
       const su2double Re_d2_0 	= pow(10,(0.7*tanh((14/(H_12 - 1)) - 9.24) + 2.492/pow((H_12 - 1),0.43) + 0.62));
@@ -156,7 +159,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
     	F_crit = 1;
       }
 
-      /*--- Source term expresses streamwise growth of Tollmien_schlichting instabilities ---*/
+      /*--- Source term expresses stream wise growth of Tollmien_schlichting instabilities ---*/
       const su2double dn_over_dRe_d2 = 0.028*(H_12 - 1) - 0.0345*exp(-pow((3.87/(H_12 - 1) - 2.52),2));
 
       /*--- Production term ---*/
@@ -168,8 +171,13 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       /*--- Implicit part ---*/
 	  Jacobian_i[0] = (VorticityMag*F_crit*F_growth*dn_over_dRe_d2) * Volume;
 
-      //if (dist_i <= 1e-4) {
-      cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<endl;
+	  if (printch){
+	  su2double pref = config->GetPressure_Ref();
+	  //const su2double Re_v = rho*dist_i*dist_i*StrainMag_i/muLam;
+	  //const su2double Re_v2 = Re_v/2.193;
+
+      //if (HL1 >= 0.328) {
+      cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<". pref = "<<pref<<endl;
       cout<<"H_12 = "<<H_12<<" H_L = "<<H_L<<endl;
       cout<<"DH12 = "<<DH_12<<" lH_12 = "<<lH_12<<". mH_12 = "<<mH_12<<". S = "<<StrainMag_i<<". d = "<<dist_i<<endl;
       cout<<"Re_y = "<<Re_y<<" Re_y_0 = "<<Re_y_0<<" k_y = "<<k_y<<" Re_d2_0 = "<<Re_d2_0<<endl;
@@ -179,6 +187,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       cout<<"EN Residual = "<<Residual<<endl;
       cout<<"EN Jacobian_i = "<<Jacobian_i[0]<<endl<<endl;
       //}
+	  }
     }
 
     AD::SetPreaccOut(Residual);
