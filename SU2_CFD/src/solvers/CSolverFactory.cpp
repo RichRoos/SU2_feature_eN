@@ -160,10 +160,10 @@ CSolver** CSolverFactory::CreateSolverContainer(MAIN_SOLVER kindMainSolver, CCon
       solver[ADJFLOW_SOL] = CreateSubSolver(SUB_SOLVER_TYPE::DISC_ADJ_FLOW, solver, geometry, config, iMGLevel);
       solver[HEAT_SOL]    = CreateSubSolver(SUB_SOLVER_TYPE::HEAT, solver, geometry, config, iMGLevel);
       solver[ADJHEAT_SOL] = CreateSubSolver(SUB_SOLVER_TYPE::DISC_ADJ_HEAT, solver, geometry, config, iMGLevel);
-      solver[TURB_SOL]    = CreateSubSolver(SUB_SOLVER_TYPE::TURB, solver, geometry, config, iMGLevel);
-      solver[ADJTURB_SOL] = CreateSubSolver(SUB_SOLVER_TYPE::DISC_ADJ_TURB, solver, geometry, config, iMGLevel);
       solver[SPECIES_SOL] = CreateSubSolver(SUB_SOLVER_TYPE::SPECIES, solver, geometry, config, iMGLevel);
       solver[ADJSPECIES_SOL] = CreateSubSolver(SUB_SOLVER_TYPE::DISC_ADJ_SPECIES, solver, geometry, config, iMGLevel);
+      solver[TURB_SOL]    = CreateSubSolver(SUB_SOLVER_TYPE::TURB, solver, geometry, config, iMGLevel);
+      solver[ADJTURB_SOL] = CreateSubSolver(SUB_SOLVER_TYPE::DISC_ADJ_TURB, solver, geometry, config, iMGLevel);
       solver[RAD_SOL]     = CreateSubSolver(SUB_SOLVER_TYPE::RADIATION, solver, geometry, config, iMGLevel);
       solver[ADJRAD_SOL]  = CreateSubSolver(SUB_SOLVER_TYPE::DISC_ADJ_RADIATION, solver, geometry, config, iMGLevel);
     break;
@@ -291,12 +291,14 @@ CSolver* CSolverFactory::CreateSubSolver(SUB_SOLVER_TYPE kindSolver, CSolver **s
       metaData.integrationType = INTEGRATION_TYPE::DEFAULT;
       break;
     case SUB_SOLVER_TYPE::TRANSITION:
-      switch (kindTransModel) {
-        case TURB_TRANS_MODEL::EN :
-    	  genericSolver = new CTransENSolver(geometry, config, iMGLevel);
-    	  metaData.integrationType = INTEGRATION_TYPE::SINGLEGRID;
-    	  break;
-      }
+      //switch (kindTransModel) {
+      //  case TURB_TRANS_MODEL::EN :
+      //	  genericSolver = new CTransENSolver(geometry, config, iMGLevel);
+      //	  metaData.integrationType = INTEGRATION_TYPE::SINGLEGRID;
+      //	  break;
+      //}
+      genericSolver = CreateTransSolver(kindTransModel, solver, geometry, config, iMGLevel, false);
+      metaData.integrationType = INTEGRATION_TYPE::SINGLEGRID;
       break;
     case SUB_SOLVER_TYPE::SPECIES:
       genericSolver = CreateSpeciesSolver(solver, geometry, config, iMGLevel, false);
@@ -377,21 +379,26 @@ CSolver* CSolverFactory::CreateTurbSolver(TURB_MODEL kindTurbModel, CSolver **so
 
 CSolver* CSolverFactory::CreateTransSolver(TURB_TRANS_MODEL kindTransModel, CSolver **solver, CGeometry *geometry, CConfig *config, int iMGLevel, int adjoint){
 
-  CSolver *transSolver = nullptr;
+  CSolver *transSolver = nullptr; 
 
   if (config->GetKind_Trans_Model() != TURB_TRANS_MODEL::NONE) {
-    switch (kindTransModel) {
-      case TURB_TRANS_MODEL::EN :
+    switch (kindTransModel) {      
+      case TURB_TRANS_MODEL::LM :
+        transSolver = new CTransLMSolver(geometry, config, iMGLevel);
+        solver[FLOW_SOL]->Preprocessing(geometry, solver, config, iMGLevel, NO_RK_ITER, RUNTIME_FLOW_SYS, false);
+        transSolver->Postprocessing(geometry, solver, config, iMGLevel);
+        solver[FLOW_SOL]->Preprocessing(geometry, solver, config, iMGLevel, NO_RK_ITER, RUNTIME_FLOW_SYS, false);
+        break; 
+	  case TURB_TRANS_MODEL::EN :
         transSolver = new CTransENSolver(geometry, config, iMGLevel);
         solver[FLOW_SOL]->Preprocessing(geometry, solver, config, iMGLevel, NO_RK_ITER, RUNTIME_FLOW_SYS, false);
         transSolver->Postprocessing(geometry, solver, config, iMGLevel);
         solver[FLOW_SOL]->Preprocessing(geometry, solver, config, iMGLevel, NO_RK_ITER, RUNTIME_FLOW_SYS, false);
         break;
-      case TURB_TRANS_MODEL::NONE:
+      case TURB_TRANS_MODEL::NONE:        
         break;
     }
-  }
-
+  }  
   return transSolver;
 }
 

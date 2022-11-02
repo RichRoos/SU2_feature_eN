@@ -2,7 +2,7 @@
  * \file trans_convection.hpp
  * \brief Delarations of numerics classes for discretization of
  *        convective fluxes in transition problems.
- * \author R. Roos
+ * \author S. Kang, R. Roos
  * \version 7.4.0 "Blackbird"
  *
  * SU2 Project Website: https://su2code.github.io
@@ -27,8 +27,16 @@
  */
 
 #pragma once
-
+#include "../turb_convection.hpp"
 #include "../../scalar/scalar_convection.hpp"
+
+/*!
+ * \class CUpwSca_TransLM
+ * \brief Re-use the SST convective fluxes for the scalar upwind discretization of LM transition model equations.
+ * \ingroup ConvDiscr
+ */
+template <class FlowIndices>
+using CUpwSca_TransLM  = CUpwSca_TurbSST<FlowIndices>;
 
 /*!
  * \class CUpwSca_TransEN

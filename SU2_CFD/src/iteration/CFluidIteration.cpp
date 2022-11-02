@@ -135,6 +135,7 @@ void CFluidIteration::Iterate(COutput* output, CIntegration**** integration, CGe
                                                                       RUNTIME_TURB_SYS, val_iZone, val_iInst);
 
     //cout << endl <<"------------------ RR: CFluidIteration: Iterate - Turb SingleGrid iteration done -----------------------------------" << endl;
+
   }
 
   if (config[val_iZone]->GetKind_Species_Model() != SPECIES_MODEL::NONE){

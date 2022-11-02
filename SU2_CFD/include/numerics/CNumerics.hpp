@@ -83,7 +83,8 @@ protected:
   turb_ke_j;  /*!< \brief Turbulent kinetic energy at point j. */
   su2double
   amplification_factor_i,  /*!< \brief amplification factor at point i. */
-  amplification_factor_j;  /*!< \brief amplification factor at point j. */
+  amplification_factor_j,  /*!< \brief amplification factor at point j. */
+  intermittency_eff_i;  /*!< \brief effective intermittency at point i. */
   su2double
   Pressure_i,  /*!< \brief Pressure at point i. */
   Pressure_j;  /*!< \brief Pressure at point j. */
@@ -715,6 +716,14 @@ public:
     amplification_factor_i = val_amplification_factor_i;
 	amplification_factor_j = val_amplification_factor_j;
   };
+
+/*!
+   * \brief Set the value of the effective intermittency for the LM model.
+   * \param[in] intermittency_eff_i - Value of the effective intermittency at point i.
+   */
+  void SetIntermittencyEff(su2double val_intermittency_eff_i) {
+    intermittency_eff_i = val_intermittency_eff_i;
+  }
 
   /*!
    * \brief Set the gradient of the auxiliary variables.
