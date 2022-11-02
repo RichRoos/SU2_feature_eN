@@ -69,6 +69,8 @@ private:
       Jacobian_i[0][0] = a0;
       Jacobian_j[0][0] = a1;
     }
+
+    //cout<<"EN Convection jacobian = "<<Jacobian_i[0][0]<<", "<<Jacobian_j[0][1]<<endl;
   }
 
 public:

@@ -78,6 +78,7 @@ private:
       Jacobian_i[0][0] = (0.5*Proj_Mean_GradScalarVar[0]-nu_e*proj_vector_ij)/sigma;
       Jacobian_j[0][0] = (0.5*Proj_Mean_GradScalarVar[0]+nu_e*proj_vector_ij)/sigma;
     }
+    //cout<<"SA Diffusion jacobian = "<<Jacobian_i[0][0]<<", "<<Jacobian_j[0][1]<<endl;
   }
 
 public:

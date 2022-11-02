@@ -80,13 +80,10 @@ private:
 
     if (implicit) {
       Jacobian_i[0][0] = (0.5*Proj_Mean_GradScalarVar[0]-diff_amplification*proj_vector_ij);
-      //const su2double proj_on_rho_i = proj_vector_ij/Density_i;
-      //Jacobian_i[0][0] = -diff_amplification*proj_on_rho_i;
-
       Jacobian_j[0][0] = (0.5*Proj_Mean_GradScalarVar[0]+diff_amplification*proj_vector_ij);
-      //const su2double proj_on_rho_j = proj_vector_ij/Density_j;
-      //Jacobian_j[0][0] = diff_amplification*proj_on_rho_j;
     }
+
+    //cout<<"EN Diffusion jacobian = "<<Jacobian_i[0][0]<<", "<<Jacobian_j[0][1]<<endl;
   }
 
 public:

@@ -107,7 +107,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
     Residual = 0.0;
     Jacobian_i[0] = 0.0;
 
-    const bool printch = true;
+    const bool printch = false;
 
     if (dist_i > 1e-10) {
 
@@ -169,7 +169,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       Residual = P_amplification * Volume;
 
       /*--- Implicit part ---*/
-	  Jacobian_i[0] = (VorticityMag*F_crit*F_growth*dn_over_dRe_d2) * Volume;
+	  Jacobian_i[0] =0.0; // Volume; //(rho*VorticityMag*F_crit*F_growth) * Volume;
 
 	  if (printch){
 	  su2double pref = config->GetPressure_Ref();

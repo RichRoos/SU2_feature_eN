@@ -161,7 +161,7 @@ class CSourceBase_TurbSA : public CNumerics {
       /*--- Compute ft2 term. Also includes boolean for e^N transition model that modifies the ft2 term ---*/
       if(TURB_TRANS_MODEL::EN == config->GetKind_Trans_Model()) {
 
-    	  AD::SetPreaccIn(amplification_factor_i);
+    	  //AD::SetPreaccIn(amplification_factor_i);
     	  su2double amplification_factor = amplification_factor_i;
     	  //cout<<"SA turb Amplification = "<<amplification_factor_i<<endl;
 
@@ -226,6 +226,7 @@ class CSourceBase_TurbSA : public CNumerics {
       Residual = (Production - Destruction + CrossProduction) * Volume;
       Jacobian_i[0] *= Volume;
 
+
       su2double p = V_i[idx.Pressure()];
       su2double pref = config->GetPressure_Ref();
       su2double rhoInf = config->GetDensity_FreeStreamND();
@@ -241,7 +242,7 @@ class CSourceBase_TurbSA : public CNumerics {
 	  su2double H_L = max(((StrainMag_i*dist_i)/u_e),0.328);
 
 	  //if (p < pInf){
-	  cout<<"SA production = "<<Production<<". SA destruction = "<<Destruction<<". SA CrossProduction = "<<CrossProduction<<endl;
+/*	  cout<<"SA production = "<<Production<<". SA destruction = "<<Destruction<<". SA CrossProduction = "<<CrossProduction<<endl;
 
 	  cout<<"SA rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<endl;
 	  cout<<"SA u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<". pref = "<<pref<<endl;
@@ -249,9 +250,8 @@ class CSourceBase_TurbSA : public CNumerics {
       //cout<<"Amplification factor = "<<amplification_factor_i<<endl;
 	  cout<<"SA Production term = "<<Production<<endl;
       cout<<"SA Residual = "<<Residual<<endl;
-      cout<<"SA Jacobian_i = "<<Jacobian_i[0]<<endl<<endl;
+      cout<<"SA Jacobian_i = "<<Jacobian_i[0]<<endl<<endl;*/
 	  //}
-
 
     }
 
