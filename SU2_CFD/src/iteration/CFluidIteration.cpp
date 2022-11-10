@@ -102,14 +102,14 @@ void CFluidIteration::Iterate(COutput* output, CIntegration**** integration, CGe
   }
   config[val_iZone]->SetGlobalParam(main_solver, RUNTIME_FLOW_SYS);
 
-  //cout << endl <<"------------ RR: CFluidIteration: Iterate - Global parameters set done ------------" << endl;
+  cout << endl <<"------------ RR: CFluidIteration: Iterate - Global parameters set done ------------" << endl;
 
   /*--- Solve the Euler, Navier-Stokes or Reynolds-averaged Navier-Stokes (RANS) equations (one iteration) ---*/
 
   integration[val_iZone][val_iInst][FLOW_SOL]->MultiGrid_Iteration(geometry, solver, numerics, config, RUNTIME_FLOW_SYS,
                                                                    val_iZone, val_iInst);
 
-  //cout << endl <<"------------ RR: CFluidIteration: Iterate - Multigrid iteration done ------------" << endl;
+  cout << endl <<"------------ RR: CFluidIteration: Iterate - Multigrid iteration done ------------" << endl;
 
   /*--- If the flow integration is not fully coupled, run the various single grid integrations. ---*/
 
@@ -119,22 +119,22 @@ void CFluidIteration::Iterate(COutput* output, CIntegration**** integration, CGe
 
 	if (config[val_iZone]->GetKind_Trans_Model() != TURB_TRANS_MODEL::NONE) {
 
-	  //cout << endl <<"----------------- RR: CFluidIteration: Iterate - Trans SingleGrid iteration starting ---------------------------" << endl;
+	  cout << endl <<"----------------- RR: CFluidIteration: Iterate - Trans SingleGrid iteration starting ---------------------------" << endl;
 	  config[val_iZone]->SetGlobalParam(main_solver, RUNTIME_TRANS_SYS);
 	  integration[val_iZone][val_iInst][TRANS_SOL]->SingleGrid_Iteration(geometry, solver, numerics, config,
 																		 RUNTIME_TRANS_SYS, val_iZone, val_iInst);
 
-	  //cout << endl <<"----------------- RR: CFluidIteration: Iterate - Trans SingleGrid iteration done -------------------------------" << endl;
+	  cout << endl <<"----------------- RR: CFluidIteration: Iterate - Trans SingleGrid iteration done -------------------------------" << endl;
 	}
 
     /*--- Solve the turbulence model ---*/
 
-	//cout << endl <<"------------------ RR: CFluidIteration: Iterate - Turb SingleGrid iteration starting ------------------------------" << endl;
+	cout << endl <<"------------------ RR: CFluidIteration: Iterate - Turb SingleGrid iteration starting ------------------------------" << endl;
     config[val_iZone]->SetGlobalParam(main_solver, RUNTIME_TURB_SYS);
     integration[val_iZone][val_iInst][TURB_SOL]->SingleGrid_Iteration(geometry, solver, numerics, config,
                                                                       RUNTIME_TURB_SYS, val_iZone, val_iInst);
 
-    //cout << endl <<"------------------ RR: CFluidIteration: Iterate - Turb SingleGrid iteration done -----------------------------------" << endl;
+    cout << endl <<"------------------ RR: CFluidIteration: Iterate - Turb SingleGrid iteration done -----------------------------------" << endl;
 
   }
 
@@ -307,6 +307,8 @@ void CFluidIteration::Solve(COutput* output, CIntegration**** integration, CGeom
   unsigned long Inner_Iter, nInner_Iter = config[val_iZone]->GetnInner_Iter();
   bool StopCalc = false;
 
+  cout << endl <<"------------ RR: CFluiditeration: Solve() start ------------" << endl;
+
   /*--- Synchronization point before a single solver iteration.
         Compute the wall clock time required. ---*/
 
@@ -316,7 +318,7 @@ void CFluidIteration::Solve(COutput* output, CIntegration**** integration, CGeom
   Preprocess(output, integration, geometry, solver, numerics, config, surface_movement, grid_movement, FFDBox,
              val_iZone, INST_0);
 
-  //cout << endl <<"------------ RR: CFluidIteration: Solve - Preprocess done ------------" << endl;
+  cout << endl <<"------------ RR: CFluidIteration: Solve - Preprocess done ------------" << endl;
 
   /*--- For steady-state flow simulations, we need to loop over ExtIter for the number of time steps ---*/
   /*--- However, ExtIter is the number of FSI iterations, so nIntIter is used in this case ---*/
@@ -328,7 +330,7 @@ void CFluidIteration::Solve(COutput* output, CIntegration**** integration, CGeom
     Iterate(output, integration, geometry, solver, numerics, config, surface_movement, grid_movement, FFDBox, val_iZone,
             INST_0);
 
-    //cout << endl <<"------------ RR: CFluidIteration: Solve - Iteration done ------------" << endl;
+    cout << endl <<"------------ RR: CFluidIteration: Solve - Iteration done ------------" << endl;
 
     /*--- Monitor the pseudo-time ---*/
     StopCalc = Monitor(output, integration, geometry, solver, numerics, config, surface_movement, grid_movement, FFDBox,
@@ -342,6 +344,10 @@ void CFluidIteration::Solve(COutput* output, CIntegration**** integration, CGeom
 
     /*--- If the iteration has converged, break the loop ---*/
     if (StopCalc) break;
+
+    if (Inner_Iter == 1000){
+    	SU2_MPI::Error("1001 Iteration done.", CURRENT_FUNCTION);
+    }
   }
 
   if (multizone && steady) {

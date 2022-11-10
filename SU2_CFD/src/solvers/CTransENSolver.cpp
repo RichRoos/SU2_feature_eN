@@ -155,11 +155,11 @@ void CTransENSolver::Preprocessing(CGeometry *geometry, CSolver **solver_contain
 
   /*--- Upwind second order reconstruction and gradients ---*/
   CommonPreprocessing(geometry, config, Output);
+
+  cout << endl <<"------------ RR: CTransENSolver: Preprocessing - Done ------------" << endl;
 }
 
 void CTransENSolver::Postprocessing(CGeometry *geometry, CSolver **solver_container, CConfig *config, unsigned short iMesh) {
-
-  //cout << endl <<"------------ RR: CTransENSolver: Postprocessing - Start ------------" << endl;
 
   /*--- Compute e^N model gradients. ---*/
 
@@ -169,6 +169,8 @@ void CTransENSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
   if (config->GetKind_Gradient_Method() == WEIGHTED_LEAST_SQUARES) {
     SetSolution_Gradient_LS(geometry, config);
   }
+
+  cout << endl <<"------------ RR: CTransENSolver: Postprocessing - Done ------------" << endl;
 }
 
 void CTransENSolver::Viscous_Residual(unsigned long iEdge, CGeometry* geometry, CSolver** solver_container,

@@ -37,6 +37,8 @@ CSinglezoneDriver::CSinglezoneDriver(char* confFile,
                                                           MPICommunicator,
                                                           false) {
 
+	cout << endl <<"------------ RR: CSinglezoneDriver: constructor done ------------" << endl;
+
   /*--- Initialize the counter for TimeIter ---*/
   TimeIter = 0;
 }
@@ -52,6 +54,8 @@ void CSinglezoneDriver::StartSolver() {
   config_container[ZONE_0]->Set_StartTime(StartTime);
 
   /*--- Main external loop of the solver. Runs for the number of time steps required. ---*/
+
+  cout << endl <<"------------ RR: CsinglezoneDriver: StartSolver() ------------" << endl;
 
   if (rank == MASTER_NODE)
     cout << endl <<"------------------------------ Begin Solver -----------------------------" << endl;
@@ -74,25 +78,25 @@ void CSinglezoneDriver::StartSolver() {
 
     Preprocess(TimeIter);
 
-    //cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Preprocess done ------------" << endl;
+    cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Preprocess done ------------" << endl;
 
     /*--- Run a time-step iteration of the single-zone problem. ---*/
 
     Run();
 
-    //cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Run done ------------" << endl;
+    cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Run done ------------" << endl;
 
     /*--- Perform some postprocessing on the solution before the update ---*/
 
     Postprocess();
 
-    //cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Postprocess done ------------" << endl;
+    cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Postprocess done ------------" << endl;
 
     /*--- Update the solution for dual time stepping strategy ---*/
 
     Update();
 
-    //cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Update done ------------" << endl;
+    cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Update done ------------" << endl;
 
     /*--- Monitor the computations after each iteration. ---*/
 
@@ -102,7 +106,7 @@ void CSinglezoneDriver::StartSolver() {
 
     Output(TimeIter);
 
-    //cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Output done ------------" << endl;
+    cout << endl <<"------------ RR: CSinglezoneDriver: StartSolver - Output done ------------" << endl;
 
     /*--- Save iteration solution for libROM ---*/
     if (config_container[MESH_0]->GetSave_libROM()) {
@@ -146,7 +150,7 @@ void CSinglezoneDriver::Preprocess(unsigned long TimeIter) {
                                                                             solver_container[ZONE_0][INST_0],
                                                                             config_container[ZONE_0], TimeIter);
 
-    //cout << endl <<"------------ RR: CSinglezoneDriver: Preprocess - Initial conditions for RANS ------------" << endl;
+    cout << endl <<"------------ RR: CSinglezoneDriver: Preprocess - Initial conditions for RANS ------------" << endl;
   }
   else if (config_container[ZONE_0]->GetHeatProblem()) {
     /*--- Set the initial condition for HEAT equation ---------------------------------------------*/
@@ -162,7 +166,7 @@ void CSinglezoneDriver::Preprocess(unsigned long TimeIter) {
     iteration_container[ZONE_0][INST_0]->Predictor(output_container[ZONE_0], integration_container, geometry_container, solver_container,
         numerics_container, config_container, surface_movement, grid_movement, FFDBox, ZONE_0, INST_0);
 
-  //cout << endl <<"------------ RR: CSinglezoneDriver: Preprocess - Predicter step done ------------" << endl;
+  cout << endl <<"------------ RR: CSinglezoneDriver: Preprocess - Predicter step done ------------" << endl;
 
   /*--- Perform a dynamic mesh update if required. ---*/
   /*--- For the Disc.Adj. of a case with (rigidly) moving grid, the appropriate
@@ -177,11 +181,13 @@ void CSinglezoneDriver::Run() {
   unsigned long OuterIter = 0;
   config_container[ZONE_0]->SetOuterIter(OuterIter);
 
+  cout << endl <<"------------ RR: CSingleZoneDriver: Run - Solve start ------------" << endl;
+
   /*--- Iterate the zone as a block, either to convergence or to a max number of iterations ---*/
   iteration_container[ZONE_0][INST_0]->Solve(output_container[ZONE_0], integration_container, geometry_container, solver_container,
         numerics_container, config_container, surface_movement, grid_movement, FFDBox, ZONE_0, INST_0);
 
-  //cout << endl <<"------------ RR: CSingleZoneDriver: Run - Solve done ------------" << endl;
+  cout << endl <<"------------ RR: CSingleZoneDriver: Run - Solve done ------------" << endl;
 
 }
 
