@@ -49,11 +49,6 @@ public:
   CTransENSolver(CGeometry *geometry, CConfig *config, unsigned short iMesh);
 
   /*!
-   * \brief Destructor of the class.
-   */
-  ~CTransENSolver() = default;
-
-  /*!
    * \brief Restart residual and compute gradients.
    * \param[in] geometry - Geometrical definition of the problem.
    * \param[in] solver_container - Container vector with all the solutions.
@@ -82,30 +77,6 @@ public:
                       CSolver **solver_container,
                       CConfig *config,
                       unsigned short iMesh) override;
-
-  /*!
-   * \brief Compute the spatial integration using a upwind scheme.
-   * \param[in] geometry - Geometrical definition of the problem.
-   * \param[in] solver_container - Container vector with all the solutions.
-   * \param[in] numerics_container - Description of the numerical method.
-   * \param[in] config - Definition of the particular problem.
-   * \param[in] iMesh - Index of the mesh in multigrid computations.
-   */
- /* void Upwind_Residual(CGeometry *geometry,
-                       CSolver **solver_container,
-                       CNumerics **numerics_container,
-                       CConfig *config,
-                       unsigned short iMesh) override;*/
-
-  /*!
-   * \brief Update the solution using an implicit solver.
-   * \param[in] geometry - Geometrical definition of the problem.
-   * \param[in] solver_container - Container vector with all the solutions.
-   * \param[in] config - Definition of the particular problem.
-   */
-  /*void ImplicitEuler_Iteration(CGeometry *geometry,
-                               CSolver **solver_container,
-                               CConfig *config) override;*/
 
   /*!
    * \brief Compute the viscous flux for the LM equation at a particular edge.

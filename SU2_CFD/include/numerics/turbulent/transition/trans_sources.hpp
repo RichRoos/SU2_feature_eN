@@ -327,28 +327,30 @@ class CSourcePieceWise_TransEN final : public CNumerics {
     Residual = 0.0;
     Jacobian_i[0] = 0.0;
 
-    const bool printch = false;
+    const bool printch = true;
 
     if (dist_i > 1e-10) {
 
-      su2double H_L, HL1;
+      su2double H_L; //, HL1;
       if (config->GetKind_Regime() == ENUM_REGIME::COMPRESSIBLE) {
-    	su2double rho_e = pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
 
-		/*--- Estimate of the flow velocity at the edge of the boundary layer ---*/
+		/*--- Estimate of the equivalent flow velocity at the edge of the boundary layer ---*/
 		const su2double G_over_Gminus_one = Gamma/(Gamma-1);
 
-		const su2double u_e = pow(2*(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e)),0.5);
+		su2double rho_e = pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
+
+		const su2double u_e = sqrt(2*(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e)));
 
 		/*--- Local pressure-gradient parameter for the boundary layer shape factor. Minimum value of 0.328 for stability ---*/
-		//HL1 = (StrainMag_i*dist_i)/u_e;
+		su2double HL1 = (StrainMag_i*dist_i)/u_e;
 		//H_L = max(HL1,0.328);
 		H_L = max(((StrainMag_i*dist_i)/u_e),0.328);
 
-		if (printch){
+		/*if (printch){
 	    cout<<"pfraction = "<<pInf/rhoInf  - p/rho_e<<endl;
-		cout<<"u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<". HL1 = "<<HL1<<endl;
-		}
+		cout<<"u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<". HL1 = "<<HL1<<". d = "<<dist_i<<". S = "<<StrainMag_i<<endl;
+
+		}*/
 
       } else {
     	SU2_MPI::Error("Sa-FT2-eN Transition model for incompressible flow is under production", CURRENT_FUNCTION);
@@ -372,12 +374,15 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       const su2double Re_d2_0 	= pow(10,(0.7*tanh((14/(H_12 - 1)) - 9.24) + 2.492/pow((H_12 - 1),0.43) + 0.62));
       const su2double Re_y_0	= k_y * Re_d2_0;
 
-      short F_crit = 0;
+      short int F_crit = 0;
       if (Re_y < Re_y_0){
     	F_crit = 0;
       } else {
     	F_crit = 1;
       }
+
+      /*--- Setting max for amplification ---*/
+      //TransVar_i[0] = min(TransVar_i[0], 15.0);
 
       /*--- Source term expresses stream wise growth of Tollmien_schlichting instabilities ---*/
       const su2double dn_over_dRe_d2 = 0.028*(H_12 - 1) - 0.0345*exp(-pow((3.87/(H_12 - 1) - 2.52),2));
@@ -389,7 +394,7 @@ class CSourcePieceWise_TransEN final : public CNumerics {
       Residual = P_amplification * Volume;
 
       /*--- Implicit part ---*/
-	  Jacobian_i[0] =0.0; // Volume; //(rho*VorticityMag*F_crit*F_growth) * Volume;
+	  Jacobian_i[0] = (rho*VorticityMag*F_crit*F_growth) * Volume; // 0.0; //Volume; //
 
 	  if (printch){
 	  su2double pref = config->GetPressure_Ref();
@@ -397,16 +402,25 @@ class CSourcePieceWise_TransEN final : public CNumerics {
 	  //const su2double Re_v2 = Re_v/2.193;
 
       //if (HL1 >= 0.328) {
-      cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<". pref = "<<pref<<endl;
+      /*cout<<"rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<". pref = "<<pref<<endl;
       cout<<"H_12 = "<<H_12<<" H_L = "<<H_L<<endl;
       cout<<"DH12 = "<<DH_12<<" lH_12 = "<<lH_12<<". mH_12 = "<<mH_12<<". S = "<<StrainMag_i<<". d = "<<dist_i<<endl;
       cout<<"Re_y = "<<Re_y<<" Re_y_0 = "<<Re_y_0<<" k_y = "<<k_y<<" Re_d2_0 = "<<Re_d2_0<<endl;
       cout<<"rho = "<<rho<<" VorticityMag = "<<VorticityMag<<" F_crit = "<<F_crit<<" F_growth = "<<F_growth<<" dn_over_dRe_d2 = "<<dn_over_dRe_d2<<endl;
-      cout<<"Production term = "<<P_amplification<<endl;
 
-      cout<<"EN Residual = "<<Residual<<endl;
-      cout<<"EN Jacobian_i = "<<Jacobian_i[0]<<endl<<endl;
+*/
+	  //if (TransVar_i[0] > 15){
+	  //cout<<"EN source: Amplificiation in numerics = "<<TransVar_i[0]<<endl;
+	  //}
+
+      //if (TransVar_i[0] > 15){
+    	  /*cout<<"EN amplification = "<<TransVar_i[0]<<endl;
+    	  cout<<"EN Production term = "<<P_amplification<<endl;
+		  cout<<"EN Residual = "<<Residual<<endl;
+		  cout<<"EN Jacobian_i = "<<Jacobian_i[0]<<endl<<endl;
+	  //}*/
       //}
+
 	  }
     }
 

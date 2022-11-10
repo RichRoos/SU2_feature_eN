@@ -50,6 +50,7 @@ struct CSAVariables {
 
   /*--- List of non-const constants ---*/
   su2double ct4 = 0.5;
+  su2double amplification;
 
   /*--- List of auxiliary functions ---*/
   su2double ft2, d_ft2, r, d_r, g, d_g, glim, fw, d_fw, Ji, d_Ji, S, Shat, d_Shat, fv1, d_fv1, fv2, d_fv2, Ncrit;
@@ -72,7 +73,6 @@ template <class FlowIndices, class Omega, class ft2, class ModVort, class rFunc,
 class CSourceBase_TurbSA : public CNumerics {
  protected:
   su2double Gamma_BC = 0.0;
-
 
   /*--- Residual and Jacobian ---*/
   su2double Residual, *Jacobian_i;
@@ -160,21 +160,26 @@ class CSourceBase_TurbSA : public CNumerics {
 
       /*--- Compute ft2 term. Also includes boolean for e^N transition model that modifies the ft2 term ---*/
       if(TURB_TRANS_MODEL::EN == config->GetKind_Trans_Model()) {
-
-    	  //AD::SetPreaccIn(amplification_factor_i);
-    	  su2double amplification_factor = amplification_factor_i;
-    	  //cout<<"SA turb Amplification = "<<amplification_factor_i<<endl;
-
-    	  var.transEN = true;
-    	  var.ct4 = 0.05;
-    	  //const su2double Tu = 100*config->GetTurbulenceIntensity_FreeStream();
-    	  var.Ncrit = -8.43 - 2.4*log(config->GetTurbulenceIntensity_FreeStream()/100);
-    	  //cout<<"Ncrit = "<<var.Ncrit<<endl;
-
-    	  ft2::get(amplification_factor, var);
-      } else {
-    	  ft2::get(1.0, var);
+        var.transEN = true;
+    	var.amplification = amplification_factor_i;
+    	var.ct4 = 0.05;
+    	var.Ncrit = -8.43 - 2.4*log(config->GetTurbulenceIntensity_FreeStream()/100);
       }
+
+    	//cout<<"SA turb Amplification = "<<amplification_factor_i<<". Ncrit = "<<var.Ncrit;
+    	//cout<<". Nu_Tilde = "<<ScalarVar_i[0]<<endl;
+
+    	//var.ct3 * (1 - exp(2*(amplification - var.Ncrit)) ) * exp(-var.ct4 * pow(var.Ji, 2))
+
+    	/*if (amplification_factor_i > 0){
+    	cout<<"SA turb. ft2 = "<<var.ft2<<". eN part ft2 = "<<(1 - exp(2*(var.amplification - var.Ncrit)));
+    	cout<<". Original ft2 = "<<var.ct3 * exp(-0.05 * pow(var.Ji, 2));
+    	cout<<". Amplification = "<<amplification_factor_i<<". Ncrit = "<<var.Ncrit;
+    	cout<<". Nu = "<<nu<<". Nu_Tilde = "<<ScalarVar_i[0]<<endl;
+    	}*/
+
+
+      ft2::get(var);
 
       /*--- Compute modified vorticity ---*/
       ModVort::get(ScalarVar_i[0], nu, var);
@@ -226,32 +231,13 @@ class CSourceBase_TurbSA : public CNumerics {
       Residual = (Production - Destruction + CrossProduction) * Volume;
       Jacobian_i[0] *= Volume;
 
-
-      su2double p = V_i[idx.Pressure()];
-      su2double pref = config->GetPressure_Ref();
-      su2double rhoInf = config->GetDensity_FreeStreamND();
-      su2double pInf = config->GetPressure_FreeStreamND();
-      const su2double *velInf 	= config->GetVelocity_FreeStreamND();
-      su2double velInf2 = 0.0;
-      for(unsigned short iDim = 0; iDim < nDim; ++iDim) {
-      	velInf2 += velInf[iDim]*velInf[iDim];
-      }
-      su2double rho_e = pow(((pow(rhoInf,Gamma)/pInf)*p),(1/Gamma));
-	  const su2double G_over_Gminus_one = Gamma/(Gamma-1);
-	  const su2double u_e = pow(2*(G_over_Gminus_one*(pInf/rhoInf) + (velInf2/2) - G_over_Gminus_one*(p/rho_e)),0.5);
-	  su2double H_L = max(((StrainMag_i*dist_i)/u_e),0.328);
-
-	  //if (p < pInf){
-/*	  cout<<"SA production = "<<Production<<". SA destruction = "<<Destruction<<". SA CrossProduction = "<<CrossProduction<<endl;
-
-	  cout<<"SA rhoInf = "<<rhoInf<<". pInf = "<<pInf<<". VelMag2 = "<<velInf2<<". Gamma = "<<Gamma<<endl;
-	  cout<<"SA u_e = "<<u_e<<". rho_e = "<<rho_e<<". p = "<<p<<". pref = "<<pref<<endl;
-	  cout<<"SA S = "<<StrainMag_i<<". d = "<<dist_i<<endl;
-      //cout<<"Amplification factor = "<<amplification_factor_i<<endl;
-	  cout<<"SA Production term = "<<Production<<endl;
-      cout<<"SA Residual = "<<Residual<<endl;
-      cout<<"SA Jacobian_i = "<<Jacobian_i[0]<<endl<<endl;*/
-	  //}
+      /*if (amplification_factor_i > 8.5){
+		cout<<"SA turb. ft2 = "<<var.ft2<<". eN part ft2 = "<<(1 - exp(2*(var.amplification - var.Ncrit)));
+		cout<<". SA part ft2 = "<<var.ct3 * exp(-0.05 * pow(var.Ji, 2));
+		cout<<". Amplification = "<<amplification_factor_i<<". Ncrit = "<<var.Ncrit;
+		cout<<". Nu_Tilde = "<<ScalarVar_i[0];
+		cout<<". Production = "<<Production<<". Destruction = "<<Destruction<<endl;
+      }*/
 
     }
 
@@ -313,7 +299,7 @@ struct ft2 {
 
 /*! \brief No-ft2 term. */
 struct Zero {
-  static void get(const su2double& n_hat, CSAVariables& var) {
+  static void get(CSAVariables& var) { //const su2double& n_hat,
     var.ft2 = 0.0;
     var.d_ft2 = 0.0;
   }
@@ -321,16 +307,16 @@ struct Zero {
 
 /*! \brief Non-zero ft2 term according to the literature. */
 struct Nonzero {
-  static void get(const su2double& amplification, CSAVariables& var) {
-	if (var.transEN == false){
-      const su2double xsi2 = pow(var.Ji, 2);
-      var.ft2 = var.ct3 * exp(-var.ct4 * xsi2);
-      var.d_ft2 = -2.0 * var.ct4 * var.Ji * var.ft2 * var.d_Ji;
+  static void get(CSAVariables& var) { //const su2double& amplification,
+	const su2double xsi2 = pow(var.Ji, 2);
 
-	} else { //Transition detected
-	  const su2double xsi2 = pow(var.Ji, 2);
-	  var.ft2 = var.ct3 * (1 - exp(2*(amplification - var.Ncrit)) ) * exp(-var.ct4 * xsi2);
-	  var.d_ft2 = -2.0 * var.ct4 * var.Ji * var.ft2 * var.d_Ji; //Extra Ncrit part acting as a constant in var.ft2
+	if (var.transEN == true){
+	  var.ft2 = var.ct3 * (1 - exp(2*(var.amplification - var.Ncrit)) ) * exp(-var.ct4 * xsi2);
+	  var.d_ft2 = -2.0 * var.ct4 * var.Ji * var.ft2 * var.d_Ji;
+
+	} else {
+	  var.ft2 = var.ct3 * exp(-var.ct4 * xsi2);
+	  var.d_ft2 = -2.0 * var.ct4 * var.Ji * var.ft2 * var.d_Ji;
 	}
   }
 };

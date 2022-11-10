@@ -82,8 +82,8 @@ protected:
   turb_ke_i,  /*!< \brief Turbulent kinetic energy at point i. */
   turb_ke_j;  /*!< \brief Turbulent kinetic energy at point j. */
   su2double
-  amplification_factor_i,  /*!< \brief amplification factor at point i. */
-  amplification_factor_j,  /*!< \brief amplification factor at point j. */
+  amplification_factor_i;  /*!< \brief amplification factor at point i. */
+  su2double
   intermittency_eff_i;  /*!< \brief effective intermittency at point i. */
   su2double
   Pressure_i,  /*!< \brief Pressure at point i. */
@@ -710,11 +710,9 @@ public:
   /*!
    * \brief Set the value of the amplification factor for the e^N model.
    * \param[in] amplification_factor_i - Value of the amplification factor at point i.
-   * \param[in] amplification_factor_j - Value of the amplification factor at point j.
    */
-  void SetAmplificationFactor(su2double val_amplification_factor_i, su2double val_amplification_factor_j) {
+  void SetAmplificationFactor(su2double val_amplification_factor_i) {
     amplification_factor_i = val_amplification_factor_i;
-	amplification_factor_j = val_amplification_factor_j;
   };
 
 /*!

@@ -39,55 +39,11 @@ template <class FlowIndices>
 using CUpwSca_TransLM  = CUpwSca_TurbSST<FlowIndices>;
 
 /*!
- * \class CUpwSca_TransEN
- * \brief Class for doing a scalar upwind solver for the e^N transition model equations.
+ * \class CUpwSca_TransLM
+ * \brief Re-use the SA convective fluxes for the scalar upwind discretization of eN transition model equations.
  * \ingroup ConvDiscr
- * \author R. Roos.
  */
 template <class FlowIndices>
-class CUpwSca_TransEN final : public CUpwScalar<FlowIndices> {
-private:
-  using Base = CUpwScalar<FlowIndices>;
-  using Base::nDim;
-  using Base::V_i;
-  using Base::V_j;
-  using Base::a0;
-  using Base::a1;
-  using Base::Flux;
-  using Base::Jacobian_i;
-  using Base::Jacobian_j;
-  using Base::ScalarVar_i;
-  using Base::ScalarVar_j;
-  using Base::implicit;
-  using Base::idx;
+using CUpwSca_TransEN  = CUpwSca_TurbSA<FlowIndices>;
 
-  /*!
-   * \brief Adds any extra variables to AD.
-   */
-  void ExtraADPreaccIn() override {}
 
-  /*!
-   * \brief SA specific steps in the ComputeResidual method
-   * \param[in] config - Definition of the particular problem.
-   */
-  void FinishResidualCalc(const CConfig* config) override {
-	  Flux[0] = a0*V_i[idx.Density()]*ScalarVar_i[0] + a1*V_j[idx.Density()]*ScalarVar_j[0];
-
-    if (implicit) {
-      Jacobian_i[0][0] = a0;
-      Jacobian_j[0][0] = a1;
-    }
-
-    //cout<<"EN Convection jacobian = "<<Jacobian_i[0][0]<<", "<<Jacobian_j[0][1]<<endl;
-  }
-
-public:
-  /*!
-   * \brief Constructor of the class.
-   * \param[in] val_nDim - Number of dimensions of the problem.
-   * \param[in] val_nVar - Number of variables of the problem.
-   * \param[in] config - Definition of the particular problem.
-   */
-  CUpwSca_TransEN(unsigned short val_nDim, unsigned short val_nVar, const CConfig* config)
-    : CUpwScalar<FlowIndices>(val_nDim, val_nVar, config) {}
-};

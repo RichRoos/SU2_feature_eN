@@ -99,13 +99,11 @@ CTransENSolver::CTransENSolver(CGeometry *geometry, CConfig *config, unsigned sh
 
   /*--- Initialize lower and upper limits---*/
   lowerlimit[0] = 1.0e-10;
-  upperlimit[0] = 1.0e10;
-
-  lowerlimit[1] = 1.0e-4;
-  upperlimit[1] = 1.0e15;
+  upperlimit[0] = -8.43 - 2.4*log(config->GetTurbulenceIntensity_FreeStream()/100) * 10 ; //1.0e10;
 
   /*--- Far-field flow state quantities and initialization. ---*/
   const su2double AmplificationFactor_Inf  = 0.0;
+  const su2double Amplification_init  = -100;
 
   Solution_Inf[0] = AmplificationFactor_Inf;
 
@@ -171,127 +169,7 @@ void CTransENSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
   if (config->GetKind_Gradient_Method() == WEIGHTED_LEAST_SQUARES) {
     SetSolution_Gradient_LS(geometry, config);
   }
-
-/*  AD::StartNoSharedReading();
-  auto* flowNodes = su2staticcast_p<CFlowVariable*>(solver_container[FLOW_SOL]->GetNodes());
-
-  SU2_OMP_FOR_STAT(omp_chunk_size)
-  for (unsigned long iPoint = 0; iPoint < nPoint; iPoint ++) {
-
-  su2double AmplificationFactor = 0.0;
-  nodes -> SetAmplificationFactor(iPoint, nodes->GetSolution(iPoint)); // AmplificationFactor
-
-  }
-  END_SU2_OMP_FOR
-
-  AD::EndNoSharedReading();*/
 }
-
-/*void CTransENSolver::ImplicitEuler_Iteration(CGeometry *geometry, CSolver **solver_container, CConfig *config) {
-
-  unsigned short iVar;
-  unsigned long iPoint, total_index;
-  su2double Delta, Delta_flow, Vol;
-
-  cout << endl <<"------------ RR: CTransENSolver: Implicit Euler - Euler implicit Done ------------" << endl;
-
-
-  --- Set maximum residual to zero ---
-
-  SetResToZero();
-
-  --- Build implicit system ---
-
-  for (iPoint = 0; iPoint < geometry->GetnPointDomain(); iPoint++) {
-    Vol = geometry->nodes->GetVolume(iPoint);
-
-    --- Modify matrix diagonal to assure diagonal dominance ---
-
-    Delta_flow = Vol / (solver_container[FLOW_SOL]->GetNodes()->GetDelta_Time(iPoint));
-    Delta = Delta_flow;
-    Jacobian.AddVal2Diag(iPoint, Delta);
-
-    for (iVar = 0; iVar < nVar; iVar++) {
-      total_index = iPoint*nVar+iVar;
-
-      --- Right hand side of the system (-Residual) and initial guess (x = 0) ---
-
-      LinSysRes[total_index] = -LinSysRes[total_index];
-      LinSysSol[total_index] = 0.0;
-      Residual_RMS[iVar] += LinSysRes[total_index]*LinSysRes[total_index]*Vol;
-      AddRes_Max(iVar, fabs(LinSysRes[total_index]), geometry->nodes->GetGlobalIndex(iPoint), geometry->nodes->GetCoord(iPoint));
-    }
-  }
-
-  --- Initialize residual and solution at the ghost points ---
-
-  for (iPoint = geometry->GetnPointDomain(); iPoint < geometry->GetnPoint(); iPoint++) {
-    for (iVar = 0; iVar < nVar; iVar++) {
-      total_index = iPoint*nVar + iVar;
-      LinSysRes[total_index] = 0.0;
-      LinSysSol[total_index] = 0.0;
-    }
-  }
-
-  --- Solve or smooth the linear system ---
-
-  System.Solve(Jacobian, LinSysRes, LinSysSol, geometry, config);
-
-  --- Update solution (system written in terms of increments) ---
-
-  for (iPoint = 0; iPoint < geometry->GetnPointDomain(); iPoint++) {
-    for (iVar = 0; iVar < nVar; iVar++)
-      nodes->AddSolution(iPoint,iVar, LinSysSol[iPoint*nVar+iVar]);
-  }
-
-  --- MPI solution ---
-
-  InitiateComms(geometry, config, SOLUTION);
-  CompleteComms(geometry, config, SOLUTION);
-
-  --- Compute the root mean square residual ---
-
-  SetResidual_RMS(geometry, config);
-
-}*/
-
-/*void CTransENSolver::Upwind_Residual(CGeometry *geometry, CSolver **solver_container,
-                                     CNumerics **numerics_container, CConfig *config, unsigned short iMesh) {
-
-  CNumerics* numerics = numerics_container[CONV_TERM];
-
-  su2double *trans_var_i, *trans_var_j, *U_i, *U_j;
-  unsigned long iEdge, iPoint, jPoint;
-
-  for (iEdge = 0; iEdge < geometry->GetnEdge(); iEdge++) {
-
-    --- Points in edge and normal vectors ---
-    iPoint = geometry->edges->GetNode(iEdge,0);
-    jPoint = geometry->edges->GetNode(iEdge,1);
-    numerics->SetNormal(geometry->edges->GetNormal(iEdge));
-
-    --- Conservative variables w/o reconstruction ---
-    U_i = solver_container[FLOW_SOL]->GetNodes()->GetSolution(iPoint);
-    U_j = solver_container[FLOW_SOL]->GetNodes()->GetSolution(jPoint);
-    numerics->SetConservative(U_i, U_j);
-
-    --- Transition variables w/o reconstruction ---
-    trans_var_i = nodes->GetSolution(iPoint);
-    trans_var_j = nodes->GetSolution(jPoint);
-    numerics->SetTransVar(trans_var_i, trans_var_j);
-
-    --- Add and subtract Residual ---
-    numerics->ComputeResidual(Residual, Jacobian_i, Jacobian_j, config);
-    LinSysRes.AddBlock(iPoint, Residual);
-    LinSysRes.SubtractBlock(jPoint, Residual);
-
-    --- Implicit part ---
-    Jacobian.UpdateBlocks(iEdge, iPoint, jPoint, Jacobian_i, Jacobian_j);
-
-  }
-
-}*/
-
 
 void CTransENSolver::Viscous_Residual(unsigned long iEdge, CGeometry* geometry, CSolver** solver_container,
                                      CNumerics* numerics, CConfig* config) {
@@ -342,11 +220,15 @@ void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
     /*--- Transition variables w/o reconstruction, and its gradient ---*/        
 
+    //cout<<"EN solver: Amplification before before = "<<nodes->GetSolution(iPoint,0)<<endl;
     numerics->SetTransVar(nodes->GetSolution(iPoint), nullptr);
     numerics->SetTransVarGradient(nodes->GetGradient(iPoint), nullptr);
 
     /*--- Set Amplification specifically ---*/
-    numerics-> SetAmplificationFactor(nodes->GetSolution(iPoint,0), 0.0);
+    //cout<<"EN solver: Amplification before = "<<nodes->GetSolution(iPoint,0)<<endl;
+    //numerics-> SetAmplificationFactor(nodes->GetSolution(iPoint,0));
+    //numerics-> SetAmplificationFactor(min(nodes->GetSolution(iPoint,0), 15.0));
+    //cout<<"EN solver: Amplification After = "<<numerics->GetAmplificationFactor()<<endl;
 
     //cout<<"EN numeric set Amplification = "<<nodes->GetSolution(iPoint,0)<<endl;
 
@@ -373,6 +255,7 @@ void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
     //cout << endl <<"------------ RR: CTransENSolver: Source residual - Numerics residual start ------------" << endl;
 
+    //cout<<"iPoint = "<<iPoint<<endl;
     auto residual = numerics->ComputeResidual(config);
 
     //cout << endl <<"------------ RR: CTransENSolver: Source residual - Numerics residual done ------------" << endl;
@@ -387,11 +270,13 @@ void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
   AD::EndNoSharedReading();
 
-  /*int poin = 150;
-  cout<<"\nAfter EN source residual, with iPoint = "<<poin<<" :"<<endl;
-  cout<<"Amplification Factor inf = "<<Solution_Inf[0]<<". Amplification = "<<nodes->GetSolution(poin,0)<<endl;
-  cout<<"nu = "<<solver_container[TURB_SOL]->GetNodes()->GetSolution(poin,0)<<". muT = "<<solver_container[TURB_SOL]->GetNodes()->GetmuT(poin)<<endl<<endl;
-*/
+  //int poin = 150;
+  /*for (unsigned short poin = 0; poin < nPointDomain-1000; poin = poin+1000) {
+	  cout<<"\nAfter EN source residual, with iPoint = "<<poin<<" :"<<endl;
+	  cout<<"Amplification Factor inf = "<<Solution_Inf[0]<<". Amplification = "<<nodes->GetSolution(poin,0)<<endl;
+	  cout<<"nu = "<<solver_container[TURB_SOL]->GetNodes()->GetSolution(poin,0)<<". muT = "<<solver_container[TURB_SOL]->GetNodes()->GetmuT(poin)<<endl<<endl;
+  }*/
+
 }
 
 void CTransENSolver::Source_Template(CGeometry *geometry, CSolver **solver_container, CNumerics *numerics,

@@ -101,6 +101,10 @@ CTurbSASolver::CTurbSASolver(CGeometry *geometry, CConfig *config, unsigned shor
 
   }
 
+  /*--- Initialize lower and upper limits---*/
+  //lowerlimit[0] = 1.0e-10;
+  //upperlimit[0] = -8.43 - 2.4*log(config->GetTurbulenceIntensity_FreeStream()/100); //1.0e10;
+
   /*--- Read farfield conditions from config ---*/
 
   Density_Inf   = config->GetDensity_FreeStreamND();
@@ -346,12 +350,12 @@ void CTurbSASolver::Source_Residual(CGeometry *geometry, CSolver **solver_contai
 
     }
 
-    //if (transition_EN) {
+    if (transition_EN) {
       //cout << endl <<"------------ RR: CTurbSASolver: Source residual - Transition n factor set ------------" << endl;
-      //numerics-> SetAmplificationFactor(solver_container[TRANS_SOL]->GetNodes()->GetSolution(iPoint,0), 0.0);
+      numerics-> SetAmplificationFactor(solver_container[TRANS_SOL]->GetNodes()->GetSolution(iPoint,0));
       //if (iPoint == 150) cout<<"SA numeric set Amplification = "<<solver_container[TRANS_SOL]->GetNodes()->GetSolution(iPoint,0)<<endl;
       //cout<<"n factor = "<<solver_container[TRANS_SOL]->GetNodes()->GetSolution(iPoint,0)<<endl;
-	//}
+	}
 
     /*--- Compute the source term ---*/
 
