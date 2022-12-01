@@ -48,6 +48,7 @@ private:
   using Base::ScalarVar_i;
   using Base::ScalarVar_j;
   using Base::implicit;
+  using Base::bounded_scalar;
 
   /*!
    * \brief Adds any extra variables to AD.
@@ -77,7 +78,7 @@ public:
    * \param[in] config - Definition of the particular problem.
    */
   CUpwSca_TurbSA(unsigned short val_nDim, unsigned short val_nVar, const CConfig* config)
-    : CUpwScalar<FlowIndices>(val_nDim, val_nVar, config) {}
+    : CUpwScalar<FlowIndices>(val_nDim, val_nVar, config) { bounded_scalar = config->GetBounded_Turb(); }
 };
 
 /*!
@@ -102,14 +103,12 @@ private:
   using Base::ScalarVar_j;
   using Base::implicit;
   using Base::idx;
+  using Base::bounded_scalar;
 
   /*!
    * \brief Adds any extra variables to AD
    */
-  void ExtraADPreaccIn() override {
-    AD::SetPreaccIn(V_i[idx.Density()]);
-    AD::SetPreaccIn(V_j[idx.Density()]);
-  }
+  void ExtraADPreaccIn() override {}
 
   /*!
    * \brief SST specific steps in the ComputeResidual method
@@ -118,7 +117,6 @@ private:
   void FinishResidualCalc(const CConfig* config) override {
     Flux[0] = a0*V_i[idx.Density()]*ScalarVar_i[0] + a1*V_j[idx.Density()]*ScalarVar_j[0];
     Flux[1] = a0*V_i[idx.Density()]*ScalarVar_i[1] + a1*V_j[idx.Density()]*ScalarVar_j[1];
-
     if (implicit) {
       Jacobian_i[0][0] = a0;    Jacobian_i[0][1] = 0.0;
       Jacobian_i[1][0] = 0.0;   Jacobian_i[1][1] = a0;
@@ -136,5 +134,5 @@ public:
    * \param[in] config - Definition of the particular problem.
    */
   CUpwSca_TurbSST(unsigned short val_nDim, unsigned short val_nVar, const CConfig* config)
-    : CUpwScalar<FlowIndices>(val_nDim, val_nVar, config) {}
+    : CUpwScalar<FlowIndices>(val_nDim, val_nVar, config) { bounded_scalar = config->GetBounded_Turb(); }
 };
