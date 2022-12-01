@@ -75,7 +75,6 @@ void CSingleGridIntegration::SingleGrid_Iteration(CGeometry ****geometry, CSolve
   cout << endl <<"------------ RR: CSingleGridIntegration: SingleGrid_iteration - Space integration done ------------" << endl;
 
   /*--- Time integration ---*/
-
   Time_Integration(geometry_fine, solvers_fine, config[iZone], NO_RK_ITER, RunTime_EqSystem);
 
   cout << endl <<"------------ RR: CSingleGridIntegration: SingleGrid_iteration - Time integration done ------------" << endl;

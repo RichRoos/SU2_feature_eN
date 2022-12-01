@@ -1589,6 +1589,8 @@ void CTurbSASolver::SetUniformInlet(const CConfig* config, unsigned short iMarke
 
 void CTurbSASolver::ComputeUnderRelaxationFactor(const CConfig *config) {
 
+  cout<<"---------------------- RR: CTurbSASolver:ComputeUnderRelaxation - Start----------------------------"<<endl;
+
   /* Apply the turbulent under-relaxation to the SA variants. The
    SA_NEG model is more robust due to allowing for negative nu_tilde,
    so the under-relaxation is not applied to that variant. */

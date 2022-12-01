@@ -461,6 +461,7 @@ void CAdjTurbSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 }
 
 void CAdjTurbSolver::ImplicitEuler_Iteration(CGeometry *geometry, CSolver **solver_container, CConfig *config) {
+  cout<<"---------------------- RR: CAdjTurbSolver:ImplicitEuler_Iteration - Start----------------------------"<<endl;
 
   unsigned short iVar;
   unsigned long iPoint, total_index;

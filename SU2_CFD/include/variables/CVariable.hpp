@@ -1170,6 +1170,13 @@ public:
   /*!
    * \brief A virtual member.
    * \param[in] iPoint - Point index.
+   * \return Resets Amplification factor to damp start calculations.
+   */
+ // void RescaleAmplificationFactor(unsigned long npoint, unsigned long nDim, unsigned long nvar, CConfig *config);
+
+  /*!
+   * \brief A virtual member.
+   * \param[in] iPoint - Point index.
    * \return Value of the vorticity.
    */
   inline virtual su2double *GetVorticity(unsigned long iPoint) { return nullptr; }

@@ -43,3 +43,19 @@ CTransENVariable::CTransENVariable(su2double AmplificationFactor, unsigned long 
 void CTransENVariable::SetAmplificationFactor(unsigned long iPoint, su2double val_AmplificationFactor) {
   AmplificationFactor(iPoint) = val_AmplificationFactor;
 }
+
+/*void CTransENVariable::RescaleAmplificationFactor2(unsigned long iPoint, su2double val_AmplificationFactor) {
+  if (Solution_Old(iPoint) == 0):
+    cout<<"Test"
+}*/
+
+//void CTransENVariable::RescaleAmplificationFactor(su2double AmplificationFactor, unsigned long npoint, unsigned long ndim, unsigned long nvar, CConfig *config)
+/*void CTransENVariable::RescaleAmplificationFactor(unsigned long npoint, unsigned long nDim, unsigned long nvar, CConfig *config) {
+
+  for(unsigned long iPoint=1; iPoint<nPoint; ++iPoint) {
+	if (abs(Solution_Old(iPoint-1,0)-Solution_Old(iPoint,0))>2){
+		cout<<"check";
+	}
+  }
+
+}*/

@@ -45,6 +45,11 @@ void CFluidIteration::Preprocess(COutput* output, CIntegration**** integration, 
         geometry[val_iZone][val_iInst], solver[val_iZone][val_iInst], config[val_iZone], TimeIter);
   }
 
+  /*if(TURB_TRANS_MODEL::EN == config[val_iZone]->GetKind_Trans_Model()) {
+	solver[val_iZone][val_iInst][MESH_0][FLOW_SOL]->SetInitialCondition(
+	    geometry[val_iZone][val_iInst], solver[val_iZone][val_iInst], config[val_iZone], TimeIter);
+  }*/
+
   /*--- Apply a Wind Gust ---*/
 
   if (config[val_iZone]->GetWind_Gust()) {
@@ -307,6 +312,8 @@ void CFluidIteration::Solve(COutput* output, CIntegration**** integration, CGeom
   unsigned long Inner_Iter, nInner_Iter = config[val_iZone]->GetnInner_Iter();
   bool StopCalc = false;
 
+  cout << endl <<"------------ RR: CFluiditeration: Val_iZone = "<<val_iZone<<" ------------" << endl;
+
   cout << endl <<"------------ RR: CFluiditeration: Solve() start ------------" << endl;
 
   /*--- Synchronization point before a single solver iteration.
@@ -345,8 +352,8 @@ void CFluidIteration::Solve(COutput* output, CIntegration**** integration, CGeom
     /*--- If the iteration has converged, break the loop ---*/
     if (StopCalc) break;
 
-    if (Inner_Iter == 1000){
-    	SU2_MPI::Error("1001 Iteration done.", CURRENT_FUNCTION);
+    if (Inner_Iter == 4){
+      SU2_MPI::Error("5 Iteration done.", CURRENT_FUNCTION);
     }
   }
 

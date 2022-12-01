@@ -69,4 +69,7 @@ public:
    */
   inline su2double GetAmplificationFactor(unsigned long iPoint) const override { return AmplificationFactor(iPoint); }
 
+  //void RescaleAmplificationFactor2(unsigned long iPoint, su2double val_AmplificationFactor);
+  //void RescaleAmplificationFactor(unsigned long npoint, unsigned long nDim, unsigned long nvar, CConfig *config);
+
 };

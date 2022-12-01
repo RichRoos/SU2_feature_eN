@@ -98,12 +98,12 @@ CTransENSolver::CTransENSolver(CGeometry *geometry, CConfig *config, unsigned sh
   }
 
   /*--- Initialize lower and upper limits---*/
-  lowerlimit[0] = 1.0e-10;
-  upperlimit[0] = -8.43 - 2.4*log(config->GetTurbulenceIntensity_FreeStream()/100) * 10 ; //1.0e10;
+  lowerlimit[0] = -20; //1.0e-30;
+  upperlimit[0] = -8.43 - 2.4*log(config->GetTurbulenceIntensity_FreeStream()/100)*10;
 
-  /*--- Far-field flow state quantities and initialization. ---*/
-  const su2double AmplificationFactor_Inf  = 0.0;
-  const su2double Amplification_init  = -100;
+  /*--- Far-field flow state quantities and initialization. Standard farfield BC should be 0.0. But to improve large gradients
+   * at the start of the simulation, it is set at a negative number to further reduce SA production term ---*/
+  const su2double AmplificationFactor_Inf  = -20;
 
   Solution_Inf[0] = AmplificationFactor_Inf;
 
@@ -161,6 +161,8 @@ void CTransENSolver::Preprocessing(CGeometry *geometry, CSolver **solver_contain
 
 void CTransENSolver::Postprocessing(CGeometry *geometry, CSolver **solver_container, CConfig *config, unsigned short iMesh) {
 
+  //CVariable* transNodes = solver_container[TRANS_SOL]->GetNodes();
+
   /*--- Compute e^N model gradients. ---*/
 
   if (config->GetKind_Gradient_Method() == GREEN_GAUSS) {
@@ -170,8 +172,36 @@ void CTransENSolver::Postprocessing(CGeometry *geometry, CSolver **solver_contai
     SetSolution_Gradient_LS(geometry, config);
   }
 
+  /*--- Checking amplification values to counter large gradients at the start of the calculations. ---*/
+
+  //solver_container[TRANS_SOL]->GetNodes()->RescaleAmplificationFactor(nPoint, nDim, nVar, config);
+
   cout << endl <<"------------ RR: CTransENSolver: Postprocessing - Done ------------" << endl;
 }
+
+/*void CTransENSolver::SetInitialCondition(CGeometry **geometry, CSolver ***solver_container, CConfig *config, unsigned long TimeIter) {
+
+  unsigned long Point_Fine;
+  su2double Area_Children, Area_Parent, *Solution_Fine;
+
+  const bool restart   = (config->GetRestart() || config->GetRestart_Flow());
+  const bool dual_time = ((config->GetTime_Marching() == TIME_MARCHING::DT_STEPPING_1ST) ||
+						  (config->GetTime_Marching() == TIME_MARCHING::DT_STEPPING_2ND));
+
+  --- The value of the solution for the first iteration of the dual time ---
+
+  if (dual_time && (TimeIter == 0 || (restart && (long)TimeIter == (long)config->GetRestart_Iter()))) {
+
+	--- Push back the initial condition to previous solution containers
+	 for a 1st-order restart or when simply intitializing to freestream. ---
+
+	for (auto iMesh = 0u; iMesh <= config->GetnMGLevels(); iMesh++) {
+	  solver_container[iMesh][TRANS_SOL]->GetNodes()->Set_Solution_time_n();
+	  solver_container[iMesh][TRANS_SOL]->GetNodes()->Set_Solution_time_n1();
+	}
+  }
+  cout << endl <<"------------ RR: CTransENSolver: Initial conditions - Done ------------" << endl;
+}*/
 
 void CTransENSolver::Viscous_Residual(unsigned long iEdge, CGeometry* geometry, CSolver** solver_container,
                                      CNumerics* numerics, CConfig* config) {
@@ -220,14 +250,20 @@ void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
     numerics->SetScalarVar(turbNodes->GetSolution(iPoint), nullptr);
     numerics->SetScalarVarGradient(turbNodes->GetGradient(iPoint), nullptr);
 
-    /*--- Transition variables w/o reconstruction, and its gradient ---*/        
+    /*--- Transition variables w/o reconstruction, and its gradient ---*/
+
+    //cout<<"EN solver: Amplification before SetTransvar = "<<nodes->GetSolution(iPoint,0);
 
     //cout<<"EN solver: Amplification before before = "<<nodes->GetSolution(iPoint,0)<<endl;
     numerics->SetTransVar(nodes->GetSolution(iPoint), nullptr);
     numerics->SetTransVarGradient(nodes->GetGradient(iPoint), nullptr);
 
     /*--- Set Amplification specifically ---*/
-    //cout<<"EN solver: Amplification before = "<<nodes->GetSolution(iPoint,0)<<endl;
+    /*if (iPoint>0) {
+      cout<<"EN solver: Amplification = "<<nodes->GetSolution(iPoint,0);
+      cout<<". EN solver: Amplification old = "<<nodes->GetSolution_Old(iPoint,0)<<endl;
+    }*/
+
     //numerics-> SetAmplificationFactor(nodes->GetSolution(iPoint,0));
     //numerics-> SetAmplificationFactor(min(nodes->GetSolution(iPoint,0), 15.0));
     //cout<<"EN solver: Amplification After = "<<numerics->GetAmplificationFactor()<<endl;
@@ -258,6 +294,7 @@ void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
     //cout << endl <<"------------ RR: CTransENSolver: Source residual - Numerics residual start ------------" << endl;
 
     //cout<<"iPoint = "<<iPoint<<endl;
+    //cout<<". Amplification before Residual = "<<nodes->GetSolution(iPoint,0);
     auto residual = numerics->ComputeResidual(config);
 
     //cout << endl <<"------------ RR: CTransENSolver: Source residual - Numerics residual done ------------" << endl;
@@ -266,6 +303,13 @@ void CTransENSolver::Source_Residual(CGeometry *geometry, CSolver **solver_conta
 
     LinSysRes.SubtractBlock(iPoint, residual);
     if (implicit) Jacobian.SubtractBlock2Diag(iPoint, residual.jacobian_i);
+
+    if (iPoint == 160){
+    	cout<<"EN solver: Amplification = "<<nodes->GetSolution(iPoint,0);
+    	cout<<". EN solver: Amplification old = "<<nodes->GetSolution_Old(iPoint,0)<<endl;
+    }
+
+    //nodes->SetSolution_Old(iPoint,0.0,0.0);
 
   }
   END_SU2_OMP_FOR
@@ -600,4 +644,49 @@ void CTransENSolver::LoadRestart(CGeometry** geometry, CSolver*** solver, CConfi
   }
   END_SU2_OMP_SAFE_GLOBAL_ACCESS
   
+}
+
+void CTransENSolver::ComputeUnderRelaxationFactor(const CConfig *config) {
+
+  const bool check = true;
+  if (check == true){
+
+  cout<<"---------------------- RR: CTransENSolver:ComputeUnderRelaxation - Start----------------------------"<<endl;
+
+  /* Loop over the solution update given by relaxing the linear
+   system for this nonlinear iteration. */
+
+  su2double localUnderRelaxation =  1.00;
+  su2double allowableRatio;
+
+  unsigned long Inner_Iter = config->GetInnerIter();
+
+  if (Inner_Iter < 10) allowableRatio =  1e-5;
+  else allowableRatio =  2;
+
+  SU2_OMP_FOR_STAT(omp_chunk_size)
+  for (unsigned long iPoint = 0; iPoint < nPointDomain; iPoint++) {
+
+    localUnderRelaxation = 1.0;
+    su2double ratio = fabs(LinSysSol[iPoint]) / (fabs(nodes->GetSolution(iPoint, 0)) + EPS);
+    /* We impose a limit on the maximum percentage that the
+      turbulence variables can change over a nonlinear iteration. */
+    if (ratio > allowableRatio) {
+      localUnderRelaxation = min(allowableRatio / ratio, localUnderRelaxation);
+    }
+
+    /* Threshold the relaxation factor in the event that there is
+     a very small value. This helps avoid catastrophic crashes due
+     to non-realizable states by canceling the update. */
+
+    if (localUnderRelaxation < 1e-10) localUnderRelaxation = 0.0;
+
+    /* Store the under-relaxation factor for this point. */
+
+    nodes->SetUnderRelaxation(iPoint, localUnderRelaxation);
+
+  }
+  END_SU2_OMP_FOR
+  }
+
 }

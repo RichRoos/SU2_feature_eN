@@ -1270,6 +1270,8 @@ void CHeatSolver::ExplicitEuler_Iteration(CGeometry *geometry, CSolver **solver_
 
 void CHeatSolver::ImplicitEuler_Iteration(CGeometry *geometry, CSolver **solver_container, CConfig *config) {
 
+  cout<<"---------------------- RR: CHeatSolver:ImplicitEuler_Iteration - Start----------------------------"<<endl;
+
   /*--- Set maximum residual to zero ---*/
 
   SetResToZero();
